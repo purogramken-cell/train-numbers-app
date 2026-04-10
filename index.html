@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#e11d48" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="でんしゃでゴー" />
+  <title>でんしゃでゴー</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <style>
+    :root {
+      --bg: #fff7ed;
+      --card: #ffffff;
+      --line: #fed7aa;
+      --text: #1f2937;
+      --sub: #6b7280;
+      --primary: #e11d48;
+      --primary-2: #fb7185;
+      --accent: #2563eb;
+      --good: #16a34a;
+      --bad: #dc2626;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(180deg, #fff7ed 0%, #fffbeb 100%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+      min-height: 100%;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      padding: env(safe-area-inset-top) 14px env(safe-area-inset-bottom) 14px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 460px;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 18px 0 22px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 2px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .hidden { display: none !important; }
+
+    .title {
+      font-size: 30px;
+      font-weight: 900;
+      margin: 0 0 8px;
+      letter-spacing: .02em;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--sub);
+      line-height: 1.6;
+      font-size: 16px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 16px;
+      text-align: center;
+    }
+
+    .hero-train {
+      font-size: 66px;
+      line-height: 1;
+    }
+
+    .start-btn, .choice-btn, .secondary-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 18px;
+      font-size: 24px;
+      font-weight: 900;
+      padding: 18px 16px;
+      cursor: pointer;
+      transition: transform .08s ease, filter .2s ease, opacity .2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .start-btn:active, .choice-btn:active, .secondary-btn:active { transform: scale(.98); }
+
+    .start-btn {
+      background: linear-gradient(90deg, var(--primary) 0%, var(--primary-2) 100%);
+      color: white;
+      box-shadow: 0 8px 20px rgba(225,29,72,0.25);
+    }
+
+    .secondary-btn {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 2px solid #bfdbfe;
+      font-size: 18px;
+      padding: 14px 16px;
+    }
+
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .pill {
+      background: #fff;
+      border: 2px solid var(--line);
+      border-radius: 18px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+
+    .pill-label {
+      display: block;
+      color: var(--sub);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .pill-value {
+      display: block;
+      font-weight: 900;
+      font-size: 20px;
+    }
+
+    .track-wrap {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .track {
+      position: relative;
+      height: 128px;
+      margin-top: 6px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #dbeafe 0%, #eff6ff 30%, #dcfce7 30%, #dcfce7 100%);
+      border: 2px solid #bfdbfe;
+      overflow: hidden;
+    }
+
+    .cloud {
+      position: absolute;
+      font-size: 26px;
+      opacity: .8;
+      animation: floatCloud 10s linear infinite;
+    }
+
+    .cloud.c1 { top: 10px; left: -30px; animation-duration: 12s; }
+    .cloud.c2 { top: 36px; left: -80px; animation-duration: 16s; }
+
+    @keyframes floatCloud {
+      from { transform: translateX(0); }
+      to { transform: translateX(560px); }
+    }
+
+    .rail {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 34px;
+      height: 10px;
+      background: #6b7280;
+      border-radius: 8px;
+    }
+
+    .rail::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -6px;
+      bottom: -6px;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent 0 12px,
+          #8b5e34 12px 26px,
+          transparent 26px 42px
+        );
+      z-index: -1;
+      opacity: .9;
+    }
+
+    .stations {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 22px;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .station {
+      width: 34px;
+      text-align: center;
+      transform: translateX(-50%);
+    }
+
+    .station:last-child .station-badge {
+      background: #fef3c7;
+      color: #92400e;
+      border-color: #fcd34d;
+    }
+
+    .station-badge {
+      margin: 0 auto 6px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: white;
+      border: 2px solid #93c5fd;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .station-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #334155;
+      white-space: nowrap;
+    }
+
+    .train {
+      position: absolute;
+      left: 20px;
+      bottom: 44px;
+      font-size: 42px;
+      transition: transform .55s cubic-bezier(.2,.8,.2,1.05);
+      filter: drop-shadow(0 6px 6px rgba(0,0,0,.12));
+    }
+
+    .question {
+      text-align: center;
+      display: grid;
+      gap: 10px;
+    }
+
+    .question-kicker {
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: .08em;
+    }
+
+    .question-text {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.3;
+      font-weight: 900;
+    }
+
+    .choices {
+      display: grid;
+      gap: 12px;
+    }
+
+    .choice-btn {
+      background: white;
+      border: 3px solid #fdba74;
+      color: #7c2d12;
+      min-height: 72px;
+    }
+
+    .choice-btn.correct {
+      background: #dcfce7;
+      border-color: #86efac;
+      color: #166534;
+    }
+
+    .choice-btn.wrong {
+      background: #fee2e2;
+      border-color: #fca5a5;
+      color: #991b1b;
+    }
+
+    .feedback {
+      min-height: 56px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 22px;
+      text-align: center;
+      padding: 8px;
+    }
+
+    .feedback.good { background: #dcfce7; color: #166534; }
+    .feedback.bad { background: #fee2e2; color: #991b1b; }
+    .feedback.neutral { background: #f8fafc; color: #475569; border: 2px dashed #cbd5e1; }
+
+    .stars {
+      font-size: 28px;
+      letter-spacing: 4px;
+      text-align: center;
+      min-height: 40px;
+    }
+
+    .result-emoji {
+      font-size: 72px;
+      text-align: center;
+    }
+
+    .result-title {
+      text-align: center;
+      font-size: 34px;
+      font-weight: 900;
+      margin: 0;
+    }
+
+    .result-copy {
+      text-align: center;
+      color: var(--sub);
+      font-size: 17px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .tiny {
+      font-size: 12px;
+      color: var(--sub);
+      text-align: center;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section id="screen-start" class="card hero">
+      <div class="hero-train">🚃✨</div>
+      <div>
+        <h1 class="title">でんしゃで ゴー！</h1>
+        <p class="subtitle">すうじをえらんで、でんしゃをゴールまで すすめよう。<br>10もん せいかいできるかな？</p>
+      </div>
+      <button id="startBtn" class="start-btn">はじめる</button>
+      <button id="speakHelpBtn" class="secondary-btn">よみあげる</button>
+      <p class="tiny">iPhoneではホーム画面に追加すると、アプリみたいに使えます。</p>
+    </section>
+
+    <section id="screen-game" class="hidden">
+      <div class="hud">
+        <div class="pill"><span class="pill-label">もんだい</span><span id="qIndex" class="pill-value">1 / 10</span></div>
+        <div class="pill"><span class="pill-label">せいかい</span><span id="score" class="pill-value">0</span></div>
+        <div class="pill"><span class="pill-label">のこり</span><span id="remaining" class="pill-value">0</span></div>
+      </div>
+
+      <div class="card track-wrap">
+        <div class="track">
+          <div class="cloud c1">☁️</div>
+          <div class="cloud c2">☁️</div>
+          <div class="rail"></div>
+          <div id="stations" class="stations"></div>
+          <div id="train" class="train">🚃</div>
+        </div>
+      </div>
+
+      <div class="card question">
+        <div class="question-kicker">でんしゃクイズ</div>
+        <h2 id="questionText" class="question-text">もんだい</h2>
+        <button id="readQuestionBtn" class="secondary-btn">もんだいを よみあげる</button>
+      </div>
+
+      <div id="choices" class="choices"></div>
+      <div id="feedback" class="feedback neutral">ボタンを えらぼう！</div>
+      <div id="stars" class="stars"></div>
+    </section>
+
+    <section id="screen-result" class="card hero hidden">
+      <div id="resultEmoji" class="result-emoji">🏆</div>
+      <div>
+        <h2 id="resultTitle" class="result-title">ゴール！</h2>
+        <p id="resultCopy" class="result-copy">よくできたね！</p>
+      </div>
+      <div id="resultStars" class="stars">⭐️⭐️⭐️</div>
+      <button id="retryBtn" class="start-btn">もういちど あそぶ</button>
+    </section>
+  </div>
+
+  <script>
+    const questions = [
+      { type: 'remain', trackLength: 5, current: 0, goal: 1, prompt: 'ゴールまで あと いくつ？', choices: [1, 2, 3], answer: 1 },
+      { type: 'remain', trackLength: 5, current: 0, goal: 2, prompt: 'ゴールまで あと いくつ？', choices: [1, 2, 3], answer: 2 },
+      { type: 'remain', trackLength: 6, current: 0, goal: 3, prompt: 'ゴールまで あと いくつ？', choices: [2, 3, 4], answer: 3 },
+      { type: 'remain', trackLength: 7, current: 1, goal: 4, prompt: 'いま 1 のえき。ゴールは 4 のえき。あと いくつ？', choices: [2, 3, 4], answer: 3 },
+      { type: 'remain', trackLength: 8, current: 2, goal: 5, prompt: 'いま 2 のえき。ゴールは 5 のえき。あと いくつ？', choices: [2, 3, 4], answer: 3 },
+      { type: 'add', trackLength: 6, current: 0, goal: 2, prompt: '1 + 1 は いくつ？', choices: [1, 2, 3], answer: 2 },
+      { type: 'add', trackLength: 7, current: 0, goal: 3, prompt: '1 + 2 は いくつ？', choices: [2, 3, 4], answer: 3 },
+      { type: 'add', trackLength: 8, current: 0, goal: 4, prompt: '2 + 2 は いくつ？', choices: [3, 4, 5], answer: 4 },
+      { type: 'remain', trackLength: 10, current: 3, goal: 7, prompt: 'いま 3 のえき。ゴールは 7 のえき。あと いくつ？', choices: [3, 4, 5], answer: 4 },
+      { type: 'remain', trackLength: 11, current: 4, goal: 9, prompt: 'いま 4 のえき。ゴールは 9 のえき。あと いくつ？', choices: [4, 5, 6], answer: 5 }
+    ];
+
+    const screenStart = document.getElementById('screen-start');
+    const screenGame = document.getElementById('screen-game');
+    const screenResult = document.getElementById('screen-result');
+    const startBtn = document.getElementById('startBtn');
+    const speakHelpBtn = document.getElementById('speakHelpBtn');
+    const retryBtn = document.getElementById('retryBtn');
+    const readQuestionBtn = document.getElementById('readQuestionBtn');
+    const qIndex = document.getElementById('qIndex');
+    const scoreEl = document.getElementById('score');
+    const remainingEl = document.getElementById('remaining');
+    const questionText = document.getElementById('questionText');
+    const choicesEl = document.getElementById('choices');
+    const feedbackEl = document.getElementById('feedback');
+    const stationsEl = document.getElementById('stations');
+    const trainEl = document.getElementById('train');
+    const starsEl = document.getElementById('stars');
+    const resultEmoji = document.getElementById('resultEmoji');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultCopy = document.getElementById('resultCopy');
+    const resultStars = document.getElementById('resultStars');
+
+    let currentIndex = 0;
+    let score = 0;
+    let locked = false;
+
+    function speak(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ja-JP';
+      utterance.rate = 0.92;
+      utterance.pitch = 1.08;
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function showScreen(name) {
+      screenStart.classList.add('hidden');
+      screenGame.classList.add('hidden');
+      screenResult.classList.add('hidden');
+      if (name === 'start') screenStart.classList.remove('hidden');
+      if (name === 'game') screenGame.classList.remove('hidden');
+      if (name === 'result') screenResult.classList.remove('hidden');
+    }
+
+    function buildStations(trackLength, goal) {
+      stationsEl.innerHTML = '';
+      for (let i = 0; i <= trackLength; i++) {
+        const station = document.createElement('div');
+        station.className = 'station';
+        station.style.left = `${(i / trackLength) * 100}%`;
+        station.innerHTML = `
+          <div class="station-badge">${i}</div>
+          <div class="station-label">${i === goal ? 'ゴール' : i === 0 ? 'スタート' : 'えき'}</div>
+        `;
+        stationsEl.appendChild(station);
+      }
+    }
+
+    function moveTrain(current, trackLength) {
+      const min = 0;
+      const maxPx = 320;
+      const x = min + (maxPx * (current / trackLength));
+      trainEl.style.transform = `translateX(${x}px)`;
+    }
+
+    function renderQuestion() {
+      const q = questions[currentIndex];
+      locked = false;
+      qIndex.textContent = `${currentIndex + 1} / ${questions.length}`;
+      scoreEl.textContent = score;
+      remainingEl.textContent = q.goal - q.current;
+      questionText.textContent = q.prompt;
+      feedbackEl.className = 'feedback neutral';
+      feedbackEl.textContent = 'ボタンを えらぼう！';
+      starsEl.textContent = '⭐️'.repeat(score);
+      buildStations(q.trackLength, q.goal);
+      moveTrain(q.current, q.trackLength);
+      choicesEl.innerHTML = '';
+
+      q.choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = choice;
+        btn.addEventListener('click', () => handleAnswer(choice, btn));
+        choicesEl.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(choice, btn) {
+      if (locked) return;
+      locked = true;
+      const q = questions[currentIndex];
+      const buttons = Array.from(document.querySelectorAll('.choice-btn'));
+
+      if (choice === q.answer) {
+        score += 1;
+        btn.classList.add('correct');
+        feedbackEl.className = 'feedback good';
+        feedbackEl.textContent = 'せいかい！ しゅっぱつ！';
+        moveTrain(q.goal, q.trackLength);
+        speak(`せいかい！ ${q.answer}`);
+      } else {
+        btn.classList.add('wrong');
+        const correctBtn = buttons.find(b => Number(b.textContent) === q.answer);
+        if (correctBtn) correctBtn.classList.add('correct');
+        feedbackEl.className = 'feedback bad';
+        feedbackEl.textContent = `ざんねん。こたえは ${q.answer}！`;
+        speak(`ざんねん。こたえは ${q.answer}`);
+      }
+
+      scoreEl.textContent = score;
+      starsEl.textContent = '⭐️'.repeat(score);
+
+      setTimeout(() => {
+        currentIndex += 1;
+        if (currentIndex >= questions.length) {
+          showResult();
+        } else {
+          renderQuestion();
+        }
+      }, 1300);
+    }
+
+    function showResult() {
+      showScreen('result');
+      const ratio = score / questions.length;
+      if (ratio === 1) {
+        resultEmoji.textContent = '🏆';
+        resultTitle.textContent = 'パーフェクト！';
+        resultCopy.textContent = `10もん ぜんぶ せいかい！ でんしゃマスターだね！`;
+      } else if (ratio >= 0.7) {
+        resultEmoji.textContent = '🚃🌟';
+        resultTitle.textContent = 'すごい！';
+        resultCopy.textContent = `${questions.length}もんちゅう ${score}もん せいかい！ とっても じょうず！`;
+      } else {
+        resultEmoji.textContent = '😊';
+        resultTitle.textContent = 'よくがんばった！';
+        resultCopy.textContent = `${questions.length}もんちゅう ${score}もん せいかい！ もういちど やってみよう！`;
+      }
+      resultStars.textContent = '⭐️'.repeat(Math.max(1, Math.ceil(score / 2)));
+      speak(resultTitle.textContent);
+    }
+
+    function startGame() {
+      currentIndex = 0;
+      score = 0;
+      showScreen('game');
+      renderQuestion();
+      speak('でんしゃで ゴー！ はじめるよ');
+    }
+
+    startBtn.addEventListener('click', startGame);
+    retryBtn.addEventListener('click', startGame);
+    speakHelpBtn.addEventListener('click', () => speak('すうじをえらんで、でんしゃをゴールまで すすめよう。じゅうもん せいかいできるかな？'));
+    readQuestionBtn.addEventListener('click', () => {
+      const q = questions[currentIndex];
+      if (q) speak(q.prompt);
+    });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
+    }
+  </script>
+</body>
+</html>
