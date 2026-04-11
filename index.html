@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>おだきゅう たんけん！ v6</title>
+  <title>おだきゅう たんけん！ v7</title>
   <meta name="theme-color" content="#1f5fbf" />
   <link rel="manifest" href="manifest.json" />
   <style>
@@ -87,6 +87,53 @@
     .mini { font-size:16px; opacity:.85; }
     .unlock { background:#fff7d1; border:2px solid #f4d56c; padding:10px 12px; border-radius:18px; margin-top:10px; font-weight:900; }
     .parent-note { margin-top:10px; font-size:12px; opacity:.72; text-align:center; }
+
+    .depart-badge, .arrival-ribbon {
+      position:absolute; left:50%; transform:translateX(-50%) scale(.7); top:8px;
+      background:linear-gradient(180deg,#fff9cf,#ffe27a); color:#7a4d00; border:2px solid #ffd56a;
+      border-radius:999px; padding:8px 16px; font-size:18px; font-weight:900; opacity:0; pointer-events:none;
+      box-shadow:0 8px 20px rgba(255,213,106,.35);
+    }
+    .arrival-ribbon { top:auto; bottom:10px; background:linear-gradient(180deg,#e9f5ff,#beddff); color:#124173; border-color:#9fc8ff; }
+    .show-badge { animation: badgePop .9s ease forwards; }
+    @keyframes badgePop {
+      0% { opacity:0; transform:translateX(-50%) scale(.7) translateY(10px); }
+      20% { opacity:1; transform:translateX(-50%) scale(1.08) translateY(0); }
+      80% { opacity:1; transform:translateX(-50%) scale(1); }
+      100% { opacity:0; transform:translateX(-50%) scale(.94) translateY(-4px); }
+    }
+    .train.pop { animation: trainPop .75s ease; }
+    .train.boost { animation: trainBoost .9s ease; }
+    @keyframes trainPop {
+      0% { transform:translateY(0) scale(1); }
+      35% { transform:translateY(-8px) scale(1.15) rotate(-3deg); }
+      100% { transform:translateY(0) scale(1); }
+    }
+    @keyframes trainBoost {
+      0% { transform:translateX(0) scale(1); filter:drop-shadow(0 0 0 rgba(255,215,0,0)); }
+      30% { transform:translateX(12px) scale(1.18); filter:drop-shadow(0 0 10px rgba(255,215,0,.9)); }
+      70% { transform:translateX(-4px) scale(1.05); }
+      100% { transform:translateX(0) scale(1); filter:drop-shadow(0 0 0 rgba(255,215,0,0)); }
+    }
+    .choice.shake { animation: shake .35s ease; }
+    @keyframes shake {
+      0%,100% { transform:translateX(0); }
+      25% { transform:translateX(-8px); }
+      50% { transform:translateX(8px); }
+      75% { transform:translateX(-5px); }
+    }
+    .feedback.pop { animation: feedbackPop .45s ease; }
+    @keyframes feedbackPop {
+      0% { transform:scale(.85); opacity:.4; }
+      100% { transform:scale(1); opacity:1; }
+    }
+    .station-box.flash { animation: cardFlash .7s ease; }
+    @keyframes cardFlash {
+      0% { box-shadow:0 0 0 rgba(255,214,106,0); }
+      40% { box-shadow:0 0 0 8px rgba(255,214,106,.28), 0 10px 30px rgba(0,0,0,.08); }
+      100% { box-shadow:0 10px 30px rgba(0,0,0,.08); }
+    }
+
     @media (max-width: 700px) {
       .hero { grid-template-columns: 1fr; }
       .station-name { font-size: 30px; }
@@ -119,7 +166,7 @@
         <h3 style="font-size:22px; margin-bottom:8px;">きょうの ルート</h3>
         <div class="route" id="previewRoute"></div>
       </div>
-      <div class="parent-note">※ とくちょう：えきごとの とうちゃくアナウンス / きらきら ろまんすかー ちゃいむ</div>
+      <div class="parent-note">※ とくちょう：えんしゅつ つよめ / しゅっぱつアニメ / きらきら ろまんすかー ちゃいむ</div>
     </section>
 
     <section id="gameScreen" class="hidden">
@@ -143,6 +190,8 @@
           <div class="announcement" id="announcementText"></div>
           <div class="landmark" id="landmark"></div>
           <div class="sparkles" id="sparkles"></div>
+          <div class="depart-badge" id="departBadge">しゅっぱつ！</div>
+          <div class="arrival-ribbon" id="arrivalRibbon">とうちゃく！</div>
         </div>
         <div class="card train-panel">
           <div>
@@ -253,7 +302,7 @@
     const goalScreen = el('goalScreen');
 
     function loadProgress() {
-      const saved = JSON.parse(localStorage.getItem('odakyu-v6-progress') || '{}');
+      const saved = JSON.parse(localStorage.getItem('odakyu-v7-progress') || '{}');
       state.unlockedRomance = !!saved.unlockedRomance;
       state.best = saved.best || 0;
       el('bestBadge').textContent = `⭐ さいこう ${state.best}こ`;
@@ -261,7 +310,7 @@
     }
 
     function saveProgress() {
-      localStorage.setItem('odakyu-v6-progress', JSON.stringify({ unlockedRomance: state.unlockedRomance, best: state.best }));
+      localStorage.setItem('odakyu-v7-progress', JSON.stringify({ unlockedRomance: state.unlockedRomance, best: state.best }));
     }
 
     function shuffle(list) {
@@ -363,44 +412,56 @@
       window.speechSynthesis.speak(u);
     }
 
-    function beep(freq=880, duration=0.12, type='sine', gap=0.03, count=2, gainMax=0.14) {
+    function toneSequence(notes, master=0.12) {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       let t = ctx.currentTime;
-      for (let i=0;i<count;i++) {
+      notes.forEach(([freq, dur, type='sine', gap=0.02, gain=master]) => {
         const o = ctx.createOscillator();
         const g = ctx.createGain();
         o.type = type;
-        o.frequency.value = freq * (1 + i*0.08);
-        g.gain.setValueAtTime(0.0001, t);
-        g.gain.exponentialRampToValueAtTime(gainMax, t+0.01);
-        g.gain.exponentialRampToValueAtTime(0.0001, t+duration);
-        o.connect(g); g.connect(ctx.destination);
-        o.start(t); o.stop(t+duration);
-        t += duration + gap;
-      }
-    }
-
-    function romanceChime() {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const melody = [
-        [1046, 0.14], [1319, 0.14], [1568, 0.2],
-        [2093, 0.16], [1568, 0.14], [1319, 0.16],
-        [1760, 0.22]
-      ];
-      let t = ctx.currentTime;
-      melody.forEach(([freq, dur], i) => {
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = i % 2 === 0 ? 'triangle' : 'sine';
         o.frequency.value = freq;
         g.gain.setValueAtTime(0.0001, t);
-        g.gain.exponentialRampToValueAtTime(0.11, t + 0.01);
+        g.gain.exponentialRampToValueAtTime(gain, t + 0.01);
         g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
         o.connect(g); g.connect(ctx.destination);
         o.start(t); o.stop(t + dur);
-        t += dur * 0.72;
+        t += dur + gap;
       });
-      setTimeout(() => sparkleBurst(14), 50);
+    }
+
+    function beep(freq=880, duration=0.12, type='sine', gap=0.03, count=2, gainMax=0.14) {
+      const notes = [];
+      for (let i=0;i<count;i++) notes.push([freq * (1 + i*0.08), duration, type, gap, gainMax]);
+      toneSequence(notes, gainMax);
+    }
+
+    function correctFanfare() {
+      toneSequence([
+        [784, 0.08, 'triangle', 0.01, 0.10],
+        [1046, 0.09, 'triangle', 0.01, 0.12],
+        [1319, 0.12, 'triangle', 0.03, 0.14],
+        [1568, 0.18, 'sine', 0.01, 0.15]
+      ], 0.14);
+    }
+
+    function wrongBuzz() {
+      toneSequence([
+        [320,0.07,'square',0.02,0.06],
+        [260,0.08,'square',0.01,0.05]
+      ], 0.06);
+    }
+
+    function romanceChime() {
+      toneSequence([
+        [1046, 0.12, 'triangle', 0.02, 0.10],
+        [1319, 0.12, 'sine', 0.02, 0.11],
+        [1568, 0.14, 'triangle', 0.02, 0.12],
+        [2093, 0.16, 'sine', 0.02, 0.12],
+        [1760, 0.12, 'triangle', 0.02, 0.11],
+        [2093, 0.18, 'sine', 0.03, 0.13],
+        [2637, 0.26, 'triangle', 0.02, 0.14]
+      ], 0.13);
+      setTimeout(() => sparkleBurst(18), 40);
     }
 
     function sparkleBurst(count=10) {
@@ -418,14 +479,49 @@
       setTimeout(() => { host.innerHTML = ''; }, 1800);
     }
 
+
+    function flashBadge(id, text) {
+      const node = el(id);
+      node.textContent = text;
+      node.classList.remove('show-badge');
+      void node.offsetWidth;
+      node.classList.add('show-badge');
+    }
+
+    function animateTrainAdvance() {
+      const nextPercent = ((state.index + 1) / (STATIONS.length - 1)) * 100;
+      const train = el('trainEmoji');
+      train.classList.remove('pop','boost');
+      void train.offsetWidth;
+      train.style.left = `calc(${nextPercent}% - 8px)`;
+      train.classList.add('boost');
+      setTimeout(() => train.classList.remove('boost'), 950);
+    }
+
+    function celebrateCorrect(nextName) {
+      flashBadge('departBadge', `しゅっぱつ！ ${nextName}へ`);
+      el('stationCard').classList.remove('flash');
+      void el('stationCard').offsetWidth;
+      el('stationCard').classList.add('flash');
+      sparkleBurst(state.mode === 'romance' ? 24 : 16);
+      animateTrainAdvance();
+      setTimeout(() => el('stationCard').classList.remove('flash'), 760);
+    }
+
     function arrivalEffect(st) {
       el('announcementText').textContent = st.announcement;
+      flashBadge('arrivalRibbon', `とうちゃく！ ${st.name}`);
+      const train = el('trainEmoji');
+      train.classList.remove('pop');
+      void train.offsetWidth;
+      train.classList.add('pop');
       if (state.mode === 'romance') {
         romanceChime();
       } else {
         beep(698, 0.09, 'triangle', 0.02, 2, 0.12);
       }
       speak(st.announcement);
+      setTimeout(() => train.classList.remove('pop'), 760);
     }
 
     function setStationTheme(st) {
@@ -484,17 +580,24 @@
         all.forEach(b => b.disabled = true);
         btn.classList.add('correct');
         const next = stationAt(state.index + 1);
-        el('feedback').className = 'feedback ok';
-        el('feedback').textContent = `せいかい！ ${next.name}へ しゅっぱつ！`;
-        state.mode === 'romance' ? romanceChime() : beep(880, 0.1, 'triangle', 0.02, 3);
+        el('feedback').className = 'feedback ok pop';
+        el('feedback').textContent = `やった！ ${next.name}へ しゅっぱつ！`;
+        if (state.mode === 'romance') {
+          romanceChime();
+        } else {
+          correctFanfare();
+        }
+        celebrateCorrect(next.name);
+        speak(`せいかい！ ${next.name}へ しゅっぱつ！`);
         el('nextBtn').classList.remove('hidden');
       } else {
-        btn.classList.add('wrong');
+        btn.classList.add('wrong','shake');
         state.wrongCount += 1;
-        beep(320, 0.08, 'sine', 0.03, 1);
+        wrongBuzz();
+        setTimeout(() => btn.classList.remove('shake'), 420);
         if (state.wrongCount === 1) {
-          el('feedback').className = 'feedback warn';
-          el('feedback').textContent = 'おしい！ ヒントを みてみよう';
+          el('feedback').className = 'feedback warn pop';
+          el('feedback').textContent = 'おしい！ もういちど えらぼう';
           const hintBtn = all.find(b => b.textContent === state.question.correct);
           if (hintBtn) hintBtn.classList.add('hint');
           el('retryBtn').classList.remove('hidden');
@@ -502,8 +605,9 @@
           all.forEach(b => b.disabled = true);
           const right = all.find(b => b.textContent === state.question.correct);
           if (right) right.classList.add('correct');
-          el('feedback').className = 'feedback warn';
+          el('feedback').className = 'feedback warn pop';
           el('feedback').textContent = `こたえは 「${state.question.correct}」！ つぎは いけるよ！`;
+          sparkleBurst(8);
           el('nextBtn').classList.remove('hidden');
         }
       }

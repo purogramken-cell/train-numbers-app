@@ -1,7 +1,7 @@
 {
-  "name": "おだきゅう たんけん！ v6",
-  "short_name": "おだきゅうv6",
-  "start_url": "./index.html?v=6",
+  "name": "おだきゅう たんけん！ v7",
+  "short_name": "おだきゅうv7",
+  "start_url": "./index.html?v=7",
   "display": "standalone",
   "background_color": "#eef6ff",
   "theme_color": "#1f5fbf",
