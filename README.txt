@@ -1,4 +1,1 @@
-おだきゅう たんけん！ v4
-- 駅ごとの見た目変化
-- 問題を実在の快速急行停車順に合わせて調整
-- 曖昧な「あといくつ止まる？」問題を削除し、「何番目の駅？」に変更
+GitHub Pagesに index.html, manifest.json, service-worker.js, icon-192.png, icon-512.png をアップロードして使ってください。

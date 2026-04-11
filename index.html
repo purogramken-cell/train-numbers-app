@@ -2,431 +2,502 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#2563eb" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="おだきゅうたんけん" />
-  <title>おだきゅう たんけん！</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>おだきゅう たんけん！ v5</title>
+  <meta name="theme-color" content="#1f5fbf" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
   <style>
     :root {
-      --bg1:#eff6ff; --bg2:#f8fafc; --card:#fff; --line:#93c5fd; --text:#0f172a; --sub:#475569;
-      --primary:#2563eb; --primary2:#38bdf8; --good:#16a34a; --warn:#f59e0b; --soft:#eef2ff;
-      --shadow:0 14px 34px rgba(15,23,42,.11); --radius:24px;
-      --stationAccent:#2563eb; --stationSoft:#dbeafe; --land:#dcfce7;
+      --bg1:#eef6ff; --bg2:#fffaf1; --panel:#ffffffee; --text:#17324d; --accent:#1f5fbf; --accent2:#ff9f1c;
+      --ok:#18a957; --warn:#f59e0b; --danger:#ef4444;
     }
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{margin:0;padding:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:var(--text)}
-    body{display:flex;justify-content:center;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom) 14px;transition:background .35s ease}
-    .app{width:100%;max-width:480px;min-height:100svh;padding:18px 0 24px;display:flex;flex-direction:column;gap:14px}
-    .card{background:var(--card);border:2px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;transition:border-color .35s ease, background .35s ease}
-    .hidden{display:none!important}
-    .title{font-size:30px;font-weight:900;line-height:1.18;text-align:center;margin:0 0 8px}
-    .subtitle{margin:0;color:var(--sub);font-size:16px;line-height:1.6;text-align:center}
-    .hero-train{font-size:70px;text-align:center;line-height:1}
-    .big-btn,.choice-btn,.mini-btn,.mode-btn{width:100%;border:0;border-radius:18px;font-weight:900;cursor:pointer;transition:transform .08s ease, opacity .2s ease, background .35s ease, border-color .35s ease}
-    .big-btn:active,.choice-btn:active,.mini-btn:active,.mode-btn:active{transform:scale(.98)}
-    .big-btn{padding:18px 16px;font-size:24px;color:#fff;background:linear-gradient(90deg,var(--primary),var(--primary2));box-shadow:0 10px 22px rgba(37,99,235,.22)}
-    .mini-btn{padding:13px 16px;font-size:17px;color:var(--primary);background:#eff6ff;border:2px solid #bfdbfe}
-    .route{background:linear-gradient(90deg,var(--stationSoft),#eff6ff);border:2px solid var(--line);color:#1e3a8a;border-radius:16px;padding:12px 14px;font-weight:900;text-align:center;font-size:14px;line-height:1.5}
-    .small{font-size:12px;line-height:1.6;color:var(--sub);text-align:center}
-    .modes{display:grid;gap:10px}
-    .mode-btn{padding:15px 14px;text-align:left;background:#fff;border:3px solid #c7d2fe;color:#1e3a8a;min-height:72px}
-    .mode-btn.locked{opacity:.55;border-style:dashed}
-    .mode-title{display:block;font-size:21px}
-    .mode-sub{display:block;font-size:13px;color:var(--sub);margin-top:4px;line-height:1.4}
-    .hud{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-    .pill{background:#fff;border:2px solid #bfdbfe;border-radius:18px;padding:10px 8px;text-align:center}
-    .pill-label{display:block;font-size:11px;color:var(--sub);margin-bottom:4px}
-    .pill-value{display:block;font-weight:900;font-size:16px}
-    .scene-card{padding:14px 14px 16px}
-    .track{position:relative;height:210px;border-radius:20px;overflow:hidden;border:2px solid var(--line);background:linear-gradient(180deg,var(--stationSoft) 0 34%,#eff6ff 34% 60%,var(--land) 60%);transition:background .35s ease,border-color .35s ease}
-    .sun{position:absolute;right:16px;top:12px;font-size:28px}
-    .cloud{position:absolute;font-size:28px;opacity:.85;animation:floatCloud 16s linear infinite}
-    .cloud.c1{left:-20px;top:16px}.cloud.c2{left:-110px;top:54px;animation-duration:20s}
-    @keyframes floatCloud{from{transform:translateX(0)}to{transform:translateX(620px)}}
-    .cityline{position:absolute;left:0;right:0;bottom:94px;height:44px;display:flex;align-items:flex-end;justify-content:center;gap:10px;opacity:.9}
-    .building{width:26px;background:rgba(255,255,255,.55);border:2px solid rgba(255,255,255,.65);border-bottom:none;border-radius:6px 6px 0 0}
-    .building.b1{height:24px}.building.b2{height:36px}.building.b3{height:30px}.building.b4{height:42px}
-    .landmark{position:absolute;left:18px;top:16px;font-size:30px}
-    .landmark-text{position:absolute;left:16px;top:52px;font-size:12px;font-weight:900;color:#1e3a8a;background:rgba(255,255,255,.75);padding:4px 8px;border-radius:999px}
-    .station-scene-name{position:absolute;right:16px;bottom:142px;font-size:14px;font-weight:900;color:#1e3a8a;background:rgba(255,255,255,.76);padding:6px 10px;border-radius:999px}
-    .rail{position:absolute;left:14px;right:14px;bottom:48px;height:10px;background:#64748b;border-radius:10px}
-    .rail::before{content:"";position:absolute;left:0;right:0;top:-6px;bottom:-6px;background:repeating-linear-gradient(90deg,transparent 0 12px,#8b5e34 12px 26px,transparent 26px 42px);z-index:-1}
-    .stations{position:absolute;left:14px;right:14px;bottom:32px;display:flex;justify-content:space-between;pointer-events:none}
-    .station{width:62px;text-align:center;transform:translateX(-50%)}
-    .badge{margin:0 auto 7px;width:30px;height:30px;border-radius:999px;background:#fff;border:2px solid var(--line);display:grid;place-items:center;font-size:12px;font-weight:900}
-    .station.current .badge{background:var(--stationSoft);border-color:var(--stationAccent);color:var(--stationAccent);transform:scale(1.08)}
-    .station.major .badge{background:#fef3c7;border-color:#fbbf24;color:#92400e}
-    .label{font-size:10px;font-weight:800;line-height:1.1;color:#334155;white-space:nowrap}
-    .train{position:absolute;left:18px;bottom:58px;font-size:46px;transition:transform .65s cubic-bezier(.2,.8,.2,1.05);filter:drop-shadow(0 6px 6px rgba(0,0,0,.12))}
-    .question{text-align:center;display:grid;gap:10px}
-    .kicker{color:var(--primary);font-weight:800;font-size:14px;letter-spacing:.08em}
-    .current-place{font-size:17px;font-weight:900;color:#1e3a8a}
-    .question-text{margin:0;font-size:30px;line-height:1.3;font-weight:900}
-    .choices{display:grid;gap:12px}
-    .choice-btn{background:#fff;border:3px solid #fdba74;color:#7c2d12;min-height:76px;padding:14px 12px;font-size:21px}
-    .choice-btn.soft-correct{background:#f0fdf4;border-color:#86efac;color:#166534}
-    .choice-btn.wrong{background:#fff7ed;border-color:#fdba74;color:#9a3412}
-    .feedback{min-height:62px;border-radius:18px;padding:10px 12px;display:grid;place-items:center;text-align:center;font-size:22px;font-weight:900;line-height:1.35}
-    .feedback.good{background:#dcfce7;color:#166534}
-    .feedback.soft{background:#fff7ed;color:#9a3412}
-    .feedback.neutral{background:#f8fafc;color:#475569;border:2px dashed #cbd5e1}
-    .chip{display:inline-block;margin-top:6px;padding:6px 10px;border-radius:999px;font-size:14px;font-weight:900;background:#fef3c7;color:#92400e}
-    .stars,.stamps{min-height:34px;text-align:center;font-size:26px;letter-spacing:4px}
-    .arrival{display:grid;gap:12px;text-align:center}
-    .arrival-emoji{font-size:68px}
-    .arrival-title{margin:0;font-size:32px;font-weight:900}
-    .arrival-copy{margin:0;color:var(--sub);font-size:17px;line-height:1.55}
-    .arrival-mini{font-size:14px;line-height:1.5;color:#334155;background:#f8fafc;border:2px dashed #cbd5e1;border-radius:16px;padding:10px 12px}
-    .result-emoji{font-size:74px;text-align:center}
-    .result-title{margin:0;text-align:center;font-size:35px;font-weight:900}
-    .result-copy{margin:0;text-align:center;color:var(--sub);font-size:17px;line-height:1.6}
+    * { box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin:0; font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
+      background: linear-gradient(180deg, var(--bg1), var(--bg2)); color:var(--text); min-height:100vh;
+    }
+    .app { max-width: 740px; margin: 0 auto; padding: 14px 14px 36px; }
+    .card { background: var(--panel); border-radius: 24px; padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.08); }
+    .hidden { display:none !important; }
+    h1,h2,h3,p { margin:0; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+    .title { font-size: 30px; font-weight: 900; letter-spacing: .02em; }
+    .tiny { font-size: 13px; opacity:.8; }
+    .pill { display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:999px; background:#fff; font-size:14px; font-weight:700; box-shadow: 0 4px 14px rgba(0,0,0,.06); }
+    .route { display:flex; gap:8px; overflow-x:auto; padding:6px 0 2px; }
+    .stop { min-width:110px; background:#fff; border:2px solid #dfe9f8; border-radius:18px; padding:10px; text-align:center; position:relative; }
+    .stop.current { border-color:var(--accent); transform: translateY(-2px); }
+    .stop.done { background:#eef9f0; border-color:#aee3bf; }
+    .stop .jp { font-weight:900; font-size:15px; }
+    .stop .land { font-size:22px; display:block; margin-bottom:4px; }
+    .connector { align-self:center; font-size:22px; opacity:.45; }
+    .hero { margin-top:12px; display:grid; grid-template-columns: 1.3fr .9fr; gap:12px; }
+    .station-box { min-height: 210px; position:relative; overflow:hidden; }
+    .station-badge { display:inline-block; background:rgba(255,255,255,.85); padding:6px 12px; border-radius:999px; font-size:14px; font-weight:800; margin-bottom:10px; }
+    .station-name { font-size: 34px; font-weight: 900; margin-bottom:8px; }
+    .station-desc { font-size: 18px; line-height:1.45; }
+    .landmark { position:absolute; right:16px; bottom:12px; font-size:88px; opacity:.18; }
+    .train-panel { display:flex; flex-direction:column; gap:12px; justify-content:space-between; }
+    .train-track { position:relative; background:#f4f7fb; height:76px; border-radius:18px; overflow:hidden; border:2px solid #dfe9f8; }
+    .rail { position:absolute; left:0; right:0; top:50%; height:8px; background: repeating-linear-gradient(90deg,#7d8da1 0 16px,#cfd8e3 16px 28px); transform: translateY(-50%); opacity:.55; }
+    .train { position:absolute; top:18px; left:12px; font-size:40px; transition:left .6s ease; }
+    .goal-flag { position:absolute; right:10px; top:8px; font-size:28px; }
+    .meter { height:14px; background:#ecf1f9; border-radius:999px; overflow:hidden; }
+    .meter > div { height:100%; width:0%; background: linear-gradient(90deg,#1f5fbf,#5ea6ff); transition: width .5s ease; }
+    .stamps { display:flex; flex-wrap:wrap; gap:8px; }
+    .stamp { width:46px; height:46px; border-radius:50%; background:#f7f8fb; display:flex; align-items:center; justify-content:center; border:2px dashed #c7d6ea; font-size:20px; }
+    .stamp.on { background:#fff6da; border-style:solid; border-color:#ffd56a; }
+    .quiz { margin-top:12px; }
+    .quiz-head { display:flex; justify-content:space-between; gap:8px; align-items:center; margin-bottom:12px; }
+    .question-type { font-weight:900; color:var(--accent); }
+    .question-text { font-size: 28px; font-weight: 900; line-height:1.35; margin-bottom:14px; }
+    .choices { display:grid; gap:12px; }
+    button.choice, .bigbtn, .modebtn {
+      appearance:none; border:none; border-radius:20px; padding:18px 16px; background:#fff; color:var(--text);
+      font-size:24px; font-weight:900; box-shadow: 0 8px 20px rgba(0,0,0,.08); border:3px solid transparent;
+    }
+    button.choice:active, .bigbtn:active, .modebtn:active { transform: scale(.98); }
+    button.choice.hint { border-color: var(--warn); }
+    button.choice.correct { border-color: var(--ok); background:#eefbf2; }
+    button.choice.wrong { border-color: var(--danger); background:#fff1f2; }
+    .feedback { margin-top:12px; min-height:68px; display:flex; align-items:center; justify-content:center; text-align:center; font-size:24px; font-weight:900; }
+    .feedback.ok { color:var(--ok); }
+    .feedback.warn { color:#b45309; }
+    .bottom { margin-top:12px; display:flex; gap:12px; }
+    .bigbtn { flex:1; background: linear-gradient(180deg, #1f5fbf, #1b4f9f); color:#fff; }
+    .subbtn { background:#fff; color:var(--accent); }
+    .screen-center { min-height: calc(100vh - 50px); display:flex; flex-direction:column; justify-content:center; gap:18px; }
+    .modes { display:grid; gap:12px; }
+    .modebtn { text-align:left; }
+    .modebtn strong { display:block; font-size:24px; }
+    .modebtn span { display:block; font-size:15px; opacity:.8; margin-top:4px; font-weight:700; }
+    .goal-screen { text-align:center; }
+    .goal-emoji { font-size:88px; }
+    .goal-title { font-size:34px; font-weight:900; margin:8px 0; }
+    .mini { font-size:16px; opacity:.85; }
+    .unlock { background:#fff7d1; border:2px solid #f4d56c; padding:10px 12px; border-radius:18px; margin-top:10px; font-weight:900; }
+    .parent-note { margin-top:10px; font-size:12px; opacity:.72; text-align:center; }
+    @media (max-width: 700px) {
+      .hero { grid-template-columns: 1fr; }
+      .station-name { font-size: 30px; }
+      .question-text { font-size:26px; }
+      button.choice { font-size:22px; }
+    }
   </style>
 </head>
 <body>
   <div class="app">
-    <section id="screen-start" class="card">
-      <div class="hero-train">🚃✨</div>
-      <h1 class="title">おだきゅう たんけん！</h1>
-      <p class="subtitle">まちだから しんじゅくまで。<br>ほんものの えき なまえで、でんしゃの たびを たのしもう！</p>
-      <div class="route">ルート： まちだ → しんゆりがおか → のぼりと → しもきたざわ → よよぎうえはら → しんじゅく</div>
-      <div class="modes" style="margin-top:14px">
-        <button id="modeRapid" class="mode-btn">
-          <span class="mode-title">🚃 かいそくきゅうこう</span>
-          <span class="mode-sub">つぎの えきと、なんばんめの えきかを あてる モード</span>
-        </button>
-        <button id="modeRomance" class="mode-btn locked">
-          <span class="mode-title">🚄 ろまんすかー</span>
-          <span class="mode-sub" id="romanceModeText">1かい ゴールすると あそべるよ</span>
-        </button>
-      </div>
-      <div class="card" style="margin-top:14px;background:#f8fafc">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="pill"><span class="pill-label">スタンプ</span><span id="startStampCount" class="pill-value">0</span></div>
-          <div class="pill"><span class="pill-label">さいこう きろく</span><span id="startBestCount" class="pill-value">0</span></div>
+    <section id="startScreen" class="screen-center">
+      <div class="topbar">
+        <div>
+          <div class="title">おだきゅう たんけん！</div>
+          <div class="tiny">まちだから しんじゅくへ。えらんで、すすんで、スタンプをあつめよう！</div>
         </div>
+        <div class="pill" id="bestBadge">⭐ さいこう 0こ</div>
       </div>
-      <button id="speakHelpBtn" class="mini-btn" style="margin-top:14px">せつめいを よみあげる</button>
-      <p class="small">えきごとに ふんいきが かわるよ。<br>せいかいすると つぎの えきへ しゅっぱつ！</p>
+      <div class="card">
+        <h2 style="font-size:28px; margin-bottom:12px;">れっしゃを えらぼう</h2>
+        <div class="modes">
+          <button class="modebtn" data-mode="rapid"><strong>🚆 かいそくきゅうこう</strong><span>ほんものっぽい ていしゃえきで しんじゅくへ！</span></button>
+          <button class="modebtn" data-mode="romance"><strong>🚄 ろまんすかー</strong><span>とくべつな ごほうびモード。きらきら ちゃいむつき！</span></button>
+          <button class="modebtn" data-mode="count"><strong>🔢 すうじ チャレンジ</strong><span>えきの かずを かぞえて たびを すすめよう！</span></button>
+        </div>
+        <div id="romanceLock" class="unlock hidden">🔓 しんじゅくに 1かい つくと、ろまんすかーが もっと たのしくなるよ！</div>
+      </div>
+      <div class="card">
+        <h3 style="font-size:22px; margin-bottom:8px;">きょうの ルート</h3>
+        <div class="route" id="previewRoute"></div>
+      </div>
+      <div class="parent-note">※ 5さいむけに「わかる」「すすむ」「もういっかい」をつよくした版です。</div>
     </section>
 
-    <section id="screen-game" class="hidden">
-      <div class="hud">
-        <div class="pill"><span class="pill-label">いま</span><span id="hudStation" class="pill-value">まちだ</span></div>
-        <div class="pill"><span class="pill-label">せいかい</span><span id="hudScore" class="pill-value">0</span></div>
-        <div class="pill"><span class="pill-label">スタンプ</span><span id="hudStamps" class="pill-value">0</span></div>
-        <div class="pill"><span class="pill-label">のこり</span><span id="hudRemain" class="pill-value">5</span></div>
+    <section id="gameScreen" class="hidden">
+      <div class="topbar">
+        <div>
+          <div class="title" id="appTitle">おだきゅう たんけん！</div>
+          <div class="tiny" id="modeCaption"></div>
+        </div>
+        <div class="pill" id="stampCount">⭐ 0 / 6</div>
       </div>
 
-      <div class="card scene-card">
-        <div class="track" id="track">
-          <div class="sun" id="sun">☀️</div>
-          <div class="cloud c1">☁️</div>
-          <div class="cloud c2">☁️</div>
-          <div class="landmark" id="landmarkEmoji">🏙️</div>
-          <div class="landmark-text" id="landmarkText">まちだ</div>
-          <div class="station-scene-name" id="sceneName">いま：まちだ</div>
-          <div class="cityline" id="cityline">
-            <div class="building b1"></div><div class="building b2"></div><div class="building b3"></div><div class="building b4"></div>
+      <div class="card">
+        <div class="route" id="routeTrack"></div>
+      </div>
+
+      <div class="hero">
+        <div class="card station-box" id="stationCard">
+          <div class="station-badge" id="stationBadge">いまの えき</div>
+          <div class="station-name" id="stationName"></div>
+          <div class="station-desc" id="stationDesc"></div>
+          <div class="landmark" id="landmark"></div>
+        </div>
+        <div class="card train-panel">
+          <div>
+            <div class="tiny" style="font-weight:800; margin-bottom:6px;">たびの しんちょく</div>
+            <div class="train-track">
+              <div class="rail"></div>
+              <div class="goal-flag">🏁</div>
+              <div class="train" id="trainEmoji">🚆</div>
+            </div>
+            <div class="meter" style="margin-top:10px;"><div id="meterFill"></div></div>
           </div>
-          <div class="rail"></div>
-          <div id="stations" class="stations"></div>
-          <div id="train" class="train">🚃</div>
+          <div>
+            <div class="tiny" style="font-weight:800; margin-bottom:6px;">スタンプ</div>
+            <div class="stamps" id="stamps"></div>
+          </div>
         </div>
       </div>
 
-      <div class="route" id="routeText">かいそくきゅうこう の たび</div>
-
-      <div class="card question">
-        <div class="kicker" id="questionKicker">つぎの えきクイズ</div>
-        <div id="currentPlace" class="current-place">いま：まちだ</div>
-        <h2 id="questionText" class="question-text">つぎに とまる えきは？</h2>
-        <button id="readQuestionBtn" class="mini-btn">もんだいを よみあげる</button>
+      <div class="card quiz">
+        <div class="quiz-head">
+          <div class="question-type" id="questionType">つぎの えき</div>
+          <button id="speakBtn" class="subbtn" style="padding:10px 14px;border-radius:999px;border:none;font-weight:900;">🔊 よみあげ</button>
+        </div>
+        <div class="question-text" id="questionText"></div>
+        <div class="choices" id="choices"></div>
+        <div class="feedback" id="feedback"></div>
+        <div class="bottom">
+          <button class="bigbtn hidden" id="nextBtn">つぎへ すすむ</button>
+          <button class="bigbtn subbtn hidden" id="retryBtn">もういちど</button>
+        </div>
       </div>
-
-      <div id="choices" class="choices"></div>
-      <div id="feedback" class="feedback neutral">えらんでみよう！</div>
-      <div id="stars" class="stars"></div>
-      <div id="stamps" class="stamps"></div>
     </section>
 
-    <section id="screen-arrival" class="card hidden arrival">
-      <div id="arrivalEmoji" class="arrival-emoji">🎉</div>
-      <h2 id="arrivalTitle" class="arrival-title">しんゆりがおか に とうちゃく！</h2>
-      <p id="arrivalCopy" class="arrival-copy">たません のりかええき！</p>
-      <div id="arrivalMini" class="arrival-mini">つぎの クイズへ すすもう！</div>
-      <div id="arrivalReward" class="stamps">🚉</div>
-      <button id="arrivalNextBtn" class="big-btn">つぎへ すすむ</button>
-    </section>
-
-    <section id="screen-result" class="card hidden arrival">
-      <div id="resultEmoji" class="result-emoji">🏆</div>
-      <h2 id="resultTitle" class="result-title">しんじゅく とうちゃく！</h2>
-      <p id="resultCopy" class="result-copy">よくできたね！</p>
-      <div id="resultStars" class="stars">⭐️⭐️⭐️</div>
-      <div id="resultUnlock" class="route">ろまんすかー モード かいほう！</div>
-      <button id="retryBtn" class="big-btn">もういちど あそぶ</button>
+    <section id="goalScreen" class="screen-center hidden">
+      <div class="card goal-screen">
+        <div class="goal-emoji" id="goalEmoji">🎉</div>
+        <div class="goal-title" id="goalTitle">しんじゅく とうちゃく！</div>
+        <p class="mini" id="goalText"></p>
+        <div class="stamps" id="goalStamps" style="justify-content:center; margin:16px 0;"></div>
+        <div id="unlockMessage" class="unlock hidden"></div>
+        <div class="bottom">
+          <button class="bigbtn" id="againBtn">もう 1かい あそぶ</button>
+          <button class="bigbtn subbtn" id="homeBtn">タイトルへ</button>
+        </div>
+      </div>
     </section>
   </div>
 
   <script>
-    const route = [
-      {id:'machida', label:'まちだ', event:'スタート！ かいそくきゅうこう しゅっぱつ！', icon:'🚉', landmark:'🏬', mini:'まちだは スタートの えき！', colors:{bg1:'#dbeafe', bg2:'#f8fafc', line:'#93c5fd', accent:'#2563eb', soft:'#dbeafe', land:'#dcfce7'}},
-      {id:'shin-yurigaoka', label:'しんゆりがおか', event:'たません のりかええき！', icon:'🌟', mini:'たませんへ いける だいじな えき！', landmark:'🌳', colors:{bg1:'#dcfce7', bg2:'#f0fdf4', line:'#86efac', accent:'#16a34a', soft:'#dcfce7', land:'#e9fbe5'}},
-      {id:'noborito', label:'のぼりと', event:'なんぶせん に のりかえ！', icon:'🌉', mini:'たまがわ ちかくの えき！', landmark:'🌉', colors:{bg1:'#e0f2fe', bg2:'#f0f9ff', line:'#7dd3fc', accent:'#0284c7', soft:'#e0f2fe', land:'#dcfce7'}},
-      {id:'shimokitazawa', label:'しもきたざわ', event:'にぎやかタウン！', icon:'🎸', mini:'おみせが たくさん あるよ！', landmark:'🎸', colors:{bg1:'#f5d0fe', bg2:'#faf5ff', line:'#e879f9', accent:'#a21caf', soft:'#fae8ff', land:'#fce7f3'}},
-      {id:'yoyogi-uehara', label:'よよぎうえはら', event:'ちよだせん と つながるよ！', icon:'🚇', mini:'もうすぐ ゴール！', landmark:'🚇', colors:{bg1:'#fde68a', bg2:'#fff7ed', line:'#fbbf24', accent:'#d97706', soft:'#fef3c7', land:'#fefce8'}},
-      {id:'shinjuku', label:'しんじゅく', event:'ゴール！ しんじゅく とうちゃく！', icon:'🏆', mini:'ビルが いっぱい！', landmark:'🏙️', colors:{bg1:'#fecaca', bg2:'#fff1f2', line:'#fda4af', accent:'#e11d48', soft:'#ffe4e6', land:'#fee2e2'}}
+    const STATIONS = [
+      { key:'machida', name:'まちだ', icon:'🏬', color1:'#eaf4ff', color2:'#fff6e7', desc:'ここから しゅっぱつ！ かいそくきゅうこうで しんじゅくへ。', trivia:'まちだは にぎやかな えき！' },
+      { key:'shin-yuri', name:'しんゆりがおか', icon:'🌳', color1:'#eefcf3', color2:'#f1fbff', desc:'たません のりかえの えき。 つぎは かわを わたるよ。', trivia:'しんゆりがおかは ぶんきの えき！' },
+      { key:'noborito', name:'のぼりと', icon:'🌉', color1:'#eefaff', color2:'#f9fff1', desc:'かわの ちかくを すすむよ。 つぎは にぎやかな まちへ。', trivia:'のぼりとは かわの ちかく！' },
+      { key:'shimokita', name:'しもきたざわ', icon:'🎸', color1:'#fff2fb', color2:'#fff9ef', desc:'おしゃれな えき！ もう だいぶ ゴールに ちかい。', trivia:'しもきたざわは にぎやか！' },
+      { key:'yoyogi-uehara', name:'よよぎうえはら', icon:'🚇', color1:'#f2f6ff', color2:'#f5fff6', desc:'もうすぐ しんじゅく！ さいごの 1えきだよ。', trivia:'よよぎうえはらは ちかてつ ものりいれ！' },
+      { key:'shinjuku', name:'しんじゅく', icon:'🏙️', color1:'#fff4e8', color2:'#f0f7ff', desc:'ゴール！ たんけん せいこう！', trivia:'しんじゅく とうちゃく！' }
     ];
 
-    const questionSets = {
-      rapid: [
-        {type:'next', from:0, prompt:'つぎに とまる えきは？', speech:'まちだの つぎに とまる えきは どこかな？', choices:['しんゆりがおか','たまがわがくえんまえ','さがみおおの'], answer:'しんゆりがおか', next:1, success:'せいかい！ しんゆりがおか！'},
-        {type:'order', from:1, prompt:'まちだから 2ばんめに とまる えきは？', speech:'まちだから 2ばんめに とまる えきは どこかな？', choices:['のぼりと','しもきたざわ','よよぎうえはら'], answer:'のぼりと', next:2, success:'せいかい！ 2ばんめは のぼりと！'},
-        {type:'next', from:2, prompt:'つぎに とまる えきは？', speech:'のぼりとの つぎに とまる えきは どこかな？', choices:['しもきたざわ','むこうがおかゆうえん','せいじょうがくえんまえ'], answer:'しもきたざわ', next:3, success:'せいかい！ しもきたざわ！'},
-        {type:'order', from:3, prompt:'まちだから 4ばんめに とまる えきは？', speech:'まちだから 4ばんめに とまる えきは どこかな？', choices:['よよぎうえはら','しんじゅく','のぼりと'], answer:'よよぎうえはら', next:4, success:'せいかい！ 4ばんめは よよぎうえはら！'},
-        {type:'next', from:4, prompt:'さいごの ゴールえきは？', speech:'よよぎうえはらの つぎの ゴールえきは どこかな？', choices:['しんじゅく','なんしんじゅく','よよぎはちまん'], answer:'しんじゅく', next:5, success:'せいかい！ しんじゅく！'}
-      ],
-      romance: [
-        {type:'next', from:0, prompt:'ろまんすかーで しゅっぱつ！ つぎは？', speech:'ろまんすかーで しゅっぱつ。つぎの えきは どこかな？', choices:['しんゆりがおか','たまがわがくえんまえ','つるかわ'], answer:'しんゆりがおか', next:1, success:'せいかい！ しんゆりがおか！'},
-        {type:'next', from:1, prompt:'つぎに とまる えきは？', speech:'しんゆりがおかの つぎに とまる えきは どこかな？', choices:['のぼりと','しもきたざわ','むこうがおかゆうえん'], answer:'のぼりと', next:2, success:'せいかい！ のぼりと！'},
-        {type:'next', from:2, prompt:'つぎに とまる えきは？', speech:'のぼりとの つぎに とまる えきは どこかな？', choices:['しもきたざわ','せいじょうがくえんまえ','よよぎうえはら'], answer:'しもきたざわ', next:3, success:'せいかい！ しもきたざわ！'},
-        {type:'next', from:3, prompt:'つぎに とまる えきは？', speech:'しもきたざわの つぎに とまる えきは どこかな？', choices:['よよぎうえはら','しんじゅく','よよぎはちまん'], answer:'よよぎうえはら', next:4, success:'せいかい！ よよぎうえはら！'},
-        {type:'goal', from:4, prompt:'さいごの ゴールは どこ？', speech:'さいごの ゴールえきは どこかな？', choices:['しんじゅく','しぶや','なんしんじゅく'], answer:'しんじゅく', next:5, success:'せいかい！ しんじゅく！'}
-      ]
+    const ROUTE_CHOICES = {
+      machida: ['しんゆりがおか','たまがわがくえんまえ','さがみおおの'],
+      'shin-yuri': ['のぼりと','よみうりらんどまえ','むこうがおかゆうえん'],
+      noborito: ['しもきたざわ','いくた','せいじょうがくえんまえ'],
+      shimokita: ['よよぎうえはら','ひがしきたざわ','しんじゅく'],
+      'yoyogi-uehara': ['しんじゅく','ひがしきたざわ','よよぎはちまん']
+    };
+
+    const state = {
+      mode: 'rapid',
+      index: 0,
+      stamps: [],
+      question: null,
+      wrongCount: 0,
+      unlockedRomance: false,
+      best: 0,
+      stationThemes: {}
     };
 
     const el = id => document.getElementById(id);
-    const screens = ['start','game','arrival','result'];
-    const state = { mode:'rapid', qs:[], qi:0, station:0, score:0, stamps:0, unlockedRomance:false, best:0 };
-    let pendingArrival = null;
-    let locked = false;
+    const previewRoute = el('previewRoute');
+    const routeTrack = el('routeTrack');
+    const stampsEl = el('stamps');
+    const goalStamps = el('goalStamps');
+    const startScreen = el('startScreen');
+    const gameScreen = el('gameScreen');
+    const goalScreen = el('goalScreen');
 
-    function loadProgress(){
-      state.stamps = Number(localStorage.getItem('odq_stamps') || '0');
-      state.best = Number(localStorage.getItem('odq_best') || '0');
-      state.unlockedRomance = localStorage.getItem('odq_romance_unlocked') === '1';
-      el('startStampCount').textContent = state.stamps;
-      el('startBestCount').textContent = state.best;
-      const romance = el('modeRomance');
-      const romanceText = el('romanceModeText');
-      if (state.unlockedRomance) {
-        romance.classList.remove('locked');
-        romanceText.textContent = 'とくべつ モード。ごほうびチャイム つき！';
-      } else {
-        romance.classList.add('locked');
-        romanceText.textContent = '1かい ゴールすると あそべるよ';
+    function loadProgress() {
+      const saved = JSON.parse(localStorage.getItem('odakyu-v5-progress') || '{}');
+      state.unlockedRomance = !!saved.unlockedRomance;
+      state.best = saved.best || 0;
+      el('bestBadge').textContent = `⭐ さいこう ${state.best}こ`;
+      if (state.unlockedRomance) el('romanceLock').classList.remove('hidden');
+    }
+
+    function saveProgress() {
+      localStorage.setItem('odakyu-v5-progress', JSON.stringify({ unlockedRomance: state.unlockedRomance, best: state.best }));
+    }
+
+    function shuffle(list) {
+      const a = [...list];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function renderRoute(target) {
+      target.innerHTML = '';
+      STATIONS.forEach((st, i) => {
+        const stop = document.createElement('div');
+        stop.className = 'stop' + (i < state.index ? ' done' : '') + (i === state.index ? ' current' : '');
+        stop.innerHTML = `<span class="land">${st.icon}</span><div class="jp">${st.name}</div>${i===state.index?'<div class="tiny">いまここ</div>':''}`;
+        target.appendChild(stop);
+        if (i < STATIONS.length - 1) {
+          const c = document.createElement('div'); c.className='connector'; c.textContent='➜'; target.appendChild(c);
+        }
+      });
+    }
+
+    function renderStamps(target, total = STATIONS.length) {
+      target.innerHTML = '';
+      for (let i = 0; i < total; i++) {
+        const s = document.createElement('div');
+        s.className = 'stamp' + (state.stamps.includes(i) ? ' on' : '');
+        s.textContent = state.stamps.includes(i) ? STATIONS[i].icon : '☆';
+        target.appendChild(s);
       }
     }
 
-    function saveProgress(){
-      localStorage.setItem('odq_stamps', String(state.stamps));
-      localStorage.setItem('odq_best', String(state.best));
-      localStorage.setItem('odq_romance_unlocked', state.unlockedRomance ? '1':'0');
-      loadProgress();
+    function stationAt(i){ return STATIONS[i]; }
+
+    function currentQuestion() {
+      const st = stationAt(state.index);
+      if (state.index >= STATIONS.length - 1) return null;
+      const next = stationAt(state.index + 1);
+      const remainStops = STATIONS.length - 1 - state.index;
+
+      const bank = [];
+      bank.push({
+        type: 'つぎの えき',
+        text: `${st.name}の つぎは どこ？`,
+        correct: next.name,
+        choices: shuffle(ROUTE_CHOICES[st.key])
+      });
+
+      bank.push({
+        type: 'なんばんめ？',
+        text: `${st.name}から 1ばん つぎに とまる えきは？`,
+        correct: next.name,
+        choices: shuffle([next.name, stationAt(Math.max(0,state.index-1)).name, stationAt(Math.min(STATIONS.length-1,state.index+2)).name].filter((v, idx, arr)=>arr.indexOf(v)===idx))
+      });
+
+      bank.push({
+        type: 'あと いくつ？',
+        text: `しんじゅくまで あと いくつ とまる？`,
+        correct: String(remainStops),
+        choices: shuffle([String(remainStops), String(Math.max(1, remainStops-1)), String(remainStops+1)])
+      });
+
+      if (state.mode === 'count') {
+        bank.push({
+          type: 'すうじ チャレンジ',
+          text: `${st.name}から ${next.name}へ すすむと えきは いくつ ふえる？`,
+          correct: '1',
+          choices: shuffle(['1','2','3'])
+        });
+      }
+
+      if (state.mode === 'romance') {
+        bank.push({
+          type: 'ろまんすかー',
+          text: `とくべつな れっしゃで ${next.name}へ いこう！ どれを おす？`,
+          correct: next.name,
+          choices: shuffle([next.name, 'まちがいじゃないけど いまは ちがう', 'あとで とまる えき'])
+        });
+      }
+
+      return bank[(state.index + (state.mode==='count'?1:0)) % bank.length];
     }
 
-    function speak(text){
+    function speak(text) {
       if (!('speechSynthesis' in window)) return;
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
-      u.lang = 'ja-JP'; u.rate = .92; u.pitch = 1.06;
-      speechSynthesis.speak(u);
+      u.lang = 'ja-JP'; u.rate = 0.95; u.pitch = 1.0;
+      window.speechSynthesis.speak(u);
     }
 
-    function playNotes(notes, type='sine', gain=.14, step=.15){
-      const Ctx = window.AudioContext || window.webkitAudioContext; if (!Ctx) return;
-      const ctx = new Ctx(); const now = ctx.currentTime + .03;
-      notes.forEach((f,i)=>{
-        const o=ctx.createOscillator(), g=ctx.createGain();
-        o.type=type; o.frequency.value=f;
-        g.gain.setValueAtTime(.0001, now+i*step);
-        g.gain.exponentialRampToValueAtTime(gain, now+i*step+.02);
-        g.gain.exponentialRampToValueAtTime(.0001, now+i*step+step-.02);
-        o.connect(g).connect(ctx.destination);
-        o.start(now+i*step); o.stop(now+i*step+step);
-      });
-      setTimeout(()=>ctx.close().catch(()=>{}), 1600);
-    }
-    const soundOk = ()=>playNotes([783.99, 1046.5], 'sine', .13, .12);
-    const soundOops = ()=>playNotes([392, 349], 'triangle', .08, .11);
-    const soundRomance = ()=>playNotes([987.77,1318.51,1567.98,1318.51], 'sine', .16, .18);
-
-    function show(name){
-      screens.forEach(s=>el('screen-'+s).classList.add('hidden'));
-      el('screen-'+name).classList.remove('hidden');
+    function beep(freq=880, duration=0.12, type='sine', gap=0.03, count=2) {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      let t = ctx.currentTime;
+      for (let i=0;i<count;i++) {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = type; o.frequency.value = freq * (1 + i*0.08);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.16, t+0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t+duration);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t); o.stop(t+duration);
+        t += duration + gap;
+      }
     }
 
-    function buildStations(){
-      const wrap = el('stations'); wrap.innerHTML='';
-      const total = route.length-1;
-      route.forEach((st,idx)=>{
-        const d = document.createElement('div');
-        d.className = 'station major' + (idx===state.station ? ' current':'');
-        d.style.left = `${(idx/total)*100}%`;
-        d.innerHTML = `<div class="badge">${idx+1}</div><div class="label">${st.label}</div>`;
-        wrap.appendChild(d);
+    function romanceChime() {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const notes = [659, 784, 988, 1319];
+      let t = ctx.currentTime;
+      notes.forEach((n, i) => {
+        const o = ctx.createOscillator(); const g = ctx.createGain();
+        o.type = 'triangle'; o.frequency.value = n;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t); o.stop(t + 0.3);
+        t += 0.16;
       });
     }
 
-    function moveTrain(){
-      const maxPx = 340; const total = route.length-1;
-      el('train').textContent = state.mode === 'romance' ? '🚄' : '🚃';
-      el('train').style.transform = `translateX(${maxPx * (state.station/total)}px)`;
+    function setStationTheme(st) {
+      document.body.style.background = `linear-gradient(180deg, ${st.color1}, ${st.color2})`;
+      el('stationName').textContent = st.name;
+      el('stationDesc').textContent = st.desc;
+      el('landmark').textContent = st.icon;
+      el('stationCard').style.background = 'rgba(255,255,255,.92)';
+      el('stationBadge').textContent = state.index === STATIONS.length - 1 ? 'ゴール！' : 'いまの えき';
     }
 
-    function applyStationTheme(){
-      const st = route[state.station];
-      const c = st.colors;
-      document.documentElement.style.setProperty('--bg1', c.bg1);
-      document.documentElement.style.setProperty('--bg2', c.bg2);
-      document.documentElement.style.setProperty('--line', c.line);
-      document.documentElement.style.setProperty('--primary', c.accent);
-      document.documentElement.style.setProperty('--primary2', c.line);
-      document.documentElement.style.setProperty('--stationAccent', c.accent);
-      document.documentElement.style.setProperty('--stationSoft', c.soft);
-      document.documentElement.style.setProperty('--land', c.land);
-      el('landmarkEmoji').textContent = st.landmark;
-      el('landmarkText').textContent = st.label;
-      el('sceneName').textContent = `いま：${st.label}`;
-      el('sun').textContent = st.id === 'shinjuku' ? '🌆' : (st.id === 'shimokitazawa' ? '🎵' : '☀️');
-      const cityline = el('cityline');
-      cityline.style.opacity = (st.id === 'machida' || st.id === 'shinjuku' || st.id === 'shimokitazawa') ? '.95' : '.55';
+    function updateTrain() {
+      const percent = (state.index / (STATIONS.length - 1)) * 100;
+      el('meterFill').style.width = percent + '%';
+      el('trainEmoji').style.left = `calc(${percent}% - 8px)`;
+      el('trainEmoji').textContent = state.mode === 'romance' ? '🚄' : '🚆';
+      el('stampCount').textContent = `⭐ ${state.stamps.length} / ${STATIONS.length}`;
     }
 
-    function setHud(){
-      el('hudStation').textContent = route[state.station].label;
-      el('hudScore').textContent = state.score;
-      el('hudStamps').textContent = state.stamps;
-      el('hudRemain').textContent = Math.max(0, (route.length-1)-state.station);
-      el('currentPlace').textContent = `いま：${route[state.station].label}`;
-      el('routeText').textContent = state.mode === 'romance' ? 'ろまんすかー の たび' : 'かいそくきゅうこう の たび';
-      el('stars').textContent = '⭐️'.repeat(state.score);
-      el('stamps').textContent = '🎫'.repeat(Math.min(10,state.stamps));
-    }
+    function renderQuestion() {
+      const st = stationAt(state.index);
+      setStationTheme(st);
+      renderRoute(routeTrack);
+      renderStamps(stampsEl);
+      updateTrain();
 
-    function renderQuestion(){
-      locked = false;
-      const q = state.qs[state.qi];
-      buildStations(); moveTrain(); setHud(); applyStationTheme();
-      el('questionKicker').textContent = q.type === 'order' ? 'すうじチャレンジ' : 'つぎの えきクイズ';
-      el('questionText').textContent = q.prompt;
-      el('feedback').className = 'feedback neutral';
-      el('feedback').textContent = 'えらんでみよう！';
-      const box = el('choices'); box.innerHTML='';
-      q.choices.forEach(choice=>{
+      state.question = currentQuestion();
+      state.wrongCount = 0;
+      el('feedback').className = 'feedback';
+      el('feedback').textContent = '';
+      el('nextBtn').classList.add('hidden');
+      el('retryBtn').classList.add('hidden');
+
+      if (!state.stamps.includes(state.index)) state.stamps.push(state.index);
+      renderStamps(stampsEl);
+
+      if (!state.question) return finishGame();
+      el('questionType').textContent = state.question.type;
+      el('questionText').textContent = state.question.text;
+      const choices = el('choices');
+      choices.innerHTML = '';
+      state.question.choices.forEach(choice => {
         const b = document.createElement('button');
-        b.className = 'choice-btn'; b.textContent = choice;
-        b.onclick = ()=>answer(choice,b);
-        box.appendChild(b);
+        b.className = 'choice';
+        b.textContent = choice;
+        b.onclick = () => selectChoice(choice, b);
+        choices.appendChild(b);
       });
     }
 
-    function showArrival(){
-      if (!pendingArrival) return;
-      const st = route[pendingArrival];
-      el('arrivalEmoji').textContent = state.mode === 'romance' ? '🚄✨' : '🚃🎉';
-      el('arrivalTitle').textContent = `${st.label} に とうちゃく！`;
-      el('arrivalCopy').textContent = st.event;
-      el('arrivalMini').textContent = st.mini;
-      el('arrivalReward').textContent = `${st.icon} ${pendingArrival === route.length-1 ? 'ごーる！' : 'スタンプ げっと！'}`;
-      show('arrival');
-      speak(`${st.label} に とうちゃく！ ${st.event}`);
-    }
-
-    function softWrong(correct){
-      const buttons = [...document.querySelectorAll('.choice-btn')];
-      buttons.forEach(b=>{ if (b.textContent === correct) b.classList.add('soft-correct'); });
-      el('feedback').className = 'feedback soft';
-      el('feedback').textContent = `おしい！ こたえは ${correct}`;
-      soundOops();
-      speak(`おしい。こたえは ${correct}`);
-      locked = false;
-    }
-
-    function answer(choice,btn){
-      if (locked) return;
-      locked = true;
-      const q = state.qs[state.qi];
-      if (choice === q.answer) {
-        state.score += 1;
-        btn.classList.add('soft-correct');
-        el('feedback').className = 'feedback good';
-        el('feedback').innerHTML = `${q.success}<br><span class="chip">${route[q.next].event}</span>`;
-        state.station = q.next;
-        state.stamps += 1;
-        soundOk();
-        if (state.mode === 'romance' || q.next === route.length-1) setTimeout(soundRomance, 180);
-        buildStations(); moveTrain(); setHud(); applyStationTheme();
-        pendingArrival = q.next;
-        setTimeout(()=>{
-          state.qi += 1;
-          if (pendingArrival != null) showArrival();
-        }, 900);
+    function selectChoice(choice, btn) {
+      const correct = choice === state.question.correct;
+      const all = [...document.querySelectorAll('.choice')];
+      if (correct) {
+        all.forEach(b => b.disabled = true);
+        btn.classList.add('correct');
+        const next = stationAt(state.index + 1);
+        el('feedback').className = 'feedback ok';
+        el('feedback').textContent = `せいかい！ ${next.name}に しゅっぱつ！`;
+        state.mode === 'romance' ? romanceChime() : beep(880, 0.1, 'triangle', 0.02, 3);
+        if (state.index + 1 < STATIONS.length) speak(`${next.name}です`);
+        el('nextBtn').classList.remove('hidden');
       } else {
         btn.classList.add('wrong');
-        softWrong(q.answer);
+        state.wrongCount += 1;
+        beep(320, 0.08, 'sine', 0.03, 1);
+        if (state.wrongCount === 1) {
+          el('feedback').className = 'feedback warn';
+          el('feedback').textContent = 'おしい！ ヒントを みてみよう';
+          const hintBtn = all.find(b => b.textContent === state.question.correct);
+          if (hintBtn) hintBtn.classList.add('hint');
+          el('retryBtn').classList.remove('hidden');
+        } else {
+          all.forEach(b => b.disabled = true);
+          const right = all.find(b => b.textContent === state.question.correct);
+          if (right) right.classList.add('correct');
+          el('feedback').className = 'feedback warn';
+          el('feedback').textContent = `こたえは 「${state.question.correct}」！ つぎは いけるよ！`;
+          el('nextBtn').classList.remove('hidden');
+        }
       }
+    }
+
+    function nextStep() {
+      state.index += 1;
+      if (state.index >= STATIONS.length - 1) return finishGame();
+      renderQuestion();
+    }
+
+    function finishGame() {
+      gameScreen.classList.add('hidden');
+      goalScreen.classList.remove('hidden');
+      const total = state.stamps.length;
+      state.best = Math.max(state.best, total);
+      if (!state.unlockedRomance) state.unlockedRomance = true;
       saveProgress();
+      el('bestBadge').textContent = `⭐ さいこう ${state.best}こ`;
+      el('goalEmoji').textContent = state.mode === 'romance' ? '🚄' : '🎉';
+      el('goalTitle').textContent = 'しんじゅく とうちゃく！';
+      el('goalText').textContent = state.mode === 'count'
+        ? 'すうじも でんしゃも ばっちり！ つぎは ろまんすかーも ためしてみよう。'
+        : 'スタンプを あつめて ゴール！ もういちど あそぶと、もっと はやく いけるかも。';
+      renderStamps(goalStamps);
+      const unlock = el('unlockMessage');
+      unlock.classList.remove('hidden');
+      unlock.textContent = '🔓 ろまんすかー モードも たのしんでね！';
+      romanceChime();
+      speak('しんじゅく とうちゃく');
     }
 
-    function nextFromArrival(){
-      if (pendingArrival === route.length-1 || state.qi >= state.qs.length) {
-        finish();
-      } else {
-        pendingArrival = null;
-        show('game');
-        renderQuestion();
-      }
-    }
-
-    function finish(){
-      show('result');
-      const cleared = state.station === route.length-1;
-      const perfectish = state.score >= Math.max(4, state.qs.length - 1);
-      if (cleared) {
-        el('resultEmoji').textContent = state.mode === 'romance' ? '🚄🏆' : '🏆';
-        el('resultTitle').textContent = 'しんじゅく とうちゃく！';
-        el('resultCopy').textContent = `${state.score}もん せいかい！ でんしゃの たび だいせいこう！`;
-        state.unlockedRomance = true;
-      } else {
-        el('resultEmoji').textContent = '😊';
-        el('resultTitle').textContent = 'また しゅっぱつ！';
-        el('resultCopy').textContent = `${state.score}もん せいかい！ もういちど たびしよう！`;
-      }
-      state.best = Math.max(state.best, state.score);
-      saveProgress();
-      el('resultStars').textContent = '⭐️'.repeat(Math.max(1, Math.ceil(state.score/2))) + (perfectish ? '✨' : '');
-      el('resultUnlock').textContent = state.unlockedRomance ? 'ろまんすかー モード かいほう！' : 'つぎは ろまんすかーを めざそう！';
-      speak(el('resultTitle').textContent);
-      if (state.mode === 'romance' || cleared) setTimeout(soundRomance, 150);
-    }
-
-    function start(mode){
-      if (mode === 'romance' && !state.unlockedRomance) return;
+    function startGame(mode) {
       state.mode = mode;
-      state.qs = questionSets[mode];
-      state.qi = 0; state.station = 0; state.score = 0; pendingArrival = null;
-      show('game'); renderQuestion();
-      speak(mode === 'romance' ? 'ろまんすかーで しゅっぱつ！ しんじゅくまで いってみよう！' : 'まちだから しんじゅくまで しゅっぱつ！ えきを あてて すすもう！');
+      state.index = 0;
+      state.stamps = [];
+      startScreen.classList.add('hidden');
+      goalScreen.classList.add('hidden');
+      gameScreen.classList.remove('hidden');
+      el('appTitle').textContent = mode === 'count' ? 'おだきゅう すうじたんけん！' : mode === 'romance' ? 'ろまんすかー たんけん！' : 'おだきゅう たんけん！';
+      el('modeCaption').textContent = mode === 'count' ? 'えきの かずを かぞえながら しんじゅくへ' : mode === 'romance' ? 'とくべつな れっしゃで きらきら しゅっぱつ！' : 'かいそくきゅうこうで しんじゅくへ';
+      renderQuestion();
+      speak('まちだから しゅっぱつ');
     }
 
-    el('modeRapid').onclick = ()=>start('rapid');
-    el('modeRomance').onclick = ()=>start('romance');
-    el('retryBtn').onclick = ()=>{ show('start'); applyStationTheme(); };
-    el('arrivalNextBtn').onclick = nextFromArrival;
-    el('speakHelpBtn').onclick = ()=>speak('まちだから しんじゅくまで でんしゃの たびを するゲームだよ。せいかいすると つぎの えきへ すすむよ。いちど ゴールすると ろまんすかー モードでも あそべるよ。');
-    el('readQuestionBtn').onclick = ()=>{ const q=state.qs[state.qi]; if(q) speak(q.speech || q.prompt); };
+    function goHome() {
+      goalScreen.classList.add('hidden');
+      gameScreen.classList.add('hidden');
+      startScreen.classList.remove('hidden');
+      renderRoute(previewRoute);
+      renderStamps(goalStamps);
+      if (state.unlockedRomance) el('romanceLock').classList.remove('hidden');
+    }
 
-    loadProgress();
-    buildStations(); moveTrain(); applyStationTheme();
+    document.querySelectorAll('.modebtn').forEach(btn => btn.addEventListener('click', () => startGame(btn.dataset.mode)));
+    el('nextBtn').addEventListener('click', nextStep);
+    el('retryBtn').addEventListener('click', () => {
+      el('retryBtn').classList.add('hidden');
+      el('feedback').textContent = 'よく みて えらんでみよう！';
+    });
+    el('againBtn').addEventListener('click', () => startGame(state.mode));
+    el('homeBtn').addEventListener('click', goHome);
+    el('speakBtn').addEventListener('click', () => speak(el('questionText').textContent));
 
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', ()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+      window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
     }
+
+    loadProgress();
+    renderRoute(previewRoute);
+    renderStamps(goalStamps);
   </script>
 </body>
 </html>
