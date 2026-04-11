@@ -1,13 +1,10 @@
-iPhone向けの静的Webアプリです。
+おだきゅう たんけん！ v3
 
-差し替えるファイル:
+更新ファイル:
 - index.html
 - manifest.json
 - service-worker.js
 - icon-192.png
 - icon-512.png
 
-今回は service-worker.js を解除版にしてあるので、更新反映しやすいです。
-
-
-Updated: Yoyogi-Uehara added before Shinjuku; original Romancecar-style chime added.
+更新後は古いホーム画面アプリを削除し、SafariでURLを開き直して再追加してください。
