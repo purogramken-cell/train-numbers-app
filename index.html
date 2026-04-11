@@ -3,45 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#2563eb" />
+  <meta name="theme-color" content="#1d4ed8" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="おだきゅうでゴー" />
-  <title>おだきゅうでゴー</title>
+  <meta name="apple-mobile-web-app-title" content="快速急行ゲーム" />
+  <title>おだきゅう かいそくきゅうこう！</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <style>
     :root {
-      --bg: #eff6ff;
+      --bg1: #eff6ff;
+      --bg2: #f8fafc;
       --card: #ffffff;
-      --line: #bfdbfe;
-      --text: #1f2937;
-      --sub: #6b7280;
-      --primary: #2563eb;
-      --primary-2: #38bdf8;
-      --accent: #2563eb;
-      --good: #16a34a;
-      --bad: #dc2626;
-      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+      --line: #93c5fd;
+      --text: #0f172a;
+      --sub: #475569;
+      --primary: #1d4ed8;
+      --primary2: #38bdf8;
+      --good: #15803d;
+      --bad: #b91c1c;
+      --warn: #f59e0b;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.10);
       --radius: 22px;
     }
-
     * { box-sizing: border-box; }
     html, body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(180deg, #eff6ff 0%, #f0fdf4 100%);
+      min-height: 100%;
+      background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
-      min-height: 100%;
     }
-
     body {
       display: flex;
       justify-content: center;
       padding: env(safe-area-inset-top) 14px env(safe-area-inset-bottom) 14px;
     }
-
     .app {
       width: 100%;
       max-width: 460px;
@@ -49,9 +47,8 @@
       display: flex;
       flex-direction: column;
       gap: 14px;
-      padding: 18px 0 22px;
+      padding: 18px 0 24px;
     }
-
     .card {
       background: var(--card);
       border: 2px solid var(--line);
@@ -59,323 +56,137 @@
       box-shadow: var(--shadow);
       padding: 18px;
     }
-
     .hidden { display: none !important; }
-
     .title {
-      font-size: 30px;
+      font-size: 29px;
       font-weight: 900;
       margin: 0 0 8px;
       letter-spacing: .02em;
+      text-align: center;
     }
-
     .subtitle {
       margin: 0;
       color: var(--sub);
-      line-height: 1.6;
+      line-height: 1.65;
       font-size: 16px;
-    }
-
-    .hero {
-      display: grid;
-      gap: 16px;
       text-align: center;
     }
-
-    .hero-train {
-      font-size: 66px;
-      line-height: 1;
-    }
-
+    .hero { display: grid; gap: 16px; }
+    .hero-train { text-align: center; font-size: 68px; line-height: 1; }
     .start-btn, .choice-btn, .secondary-btn {
-      width: 100%;
-      border: 0;
-      border-radius: 18px;
-      font-size: 24px;
+      width: 100%; border: 0; border-radius: 18px; cursor: pointer;
+      transition: transform .08s ease, opacity .2s ease; -webkit-tap-highlight-color: transparent;
       font-weight: 900;
-      padding: 18px 16px;
-      cursor: pointer;
-      transition: transform .08s ease, filter .2s ease, opacity .2s ease;
-      -webkit-tap-highlight-color: transparent;
     }
-
     .start-btn:active, .choice-btn:active, .secondary-btn:active { transform: scale(.98); }
-
     .start-btn {
-      background: linear-gradient(90deg, var(--primary) 0%, var(--primary-2) 100%);
-      color: white;
-      box-shadow: 0 8px 20px rgba(225,29,72,0.25);
+      padding: 18px 16px; font-size: 24px; color: white;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--primary2) 100%);
+      box-shadow: 0 10px 22px rgba(29, 78, 216, .22);
     }
-
     .secondary-btn {
-      background: #eff6ff;
-      color: #1d4ed8;
-      border: 2px solid #bfdbfe;
-      font-size: 18px;
-      padding: 14px 16px;
+      padding: 14px 16px; font-size: 18px; color: var(--primary);
+      background: #eff6ff; border: 2px solid #bfdbfe;
     }
-
-    .hud {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .pill {
-      background: #fff;
-      border: 2px solid var(--line);
-      border-radius: 18px;
-      padding: 10px 12px;
-      text-align: center;
-    }
-
-    .pill-label {
-      display: block;
-      color: var(--sub);
-      font-size: 12px;
-      margin-bottom: 4px;
-    }
-
-    .pill-value {
-      display: block;
-      font-weight: 900;
-      font-size: 20px;
-    }
-
-    .track-wrap {
-      overflow: hidden;
-      position: relative;
-    }
-
-    .track {
-      position: relative;
-      height: 128px;
-      margin-top: 6px;
-      border-radius: 18px;
-      background: linear-gradient(180deg, #dbeafe 0%, #eff6ff 30%, #dcfce7 30%, #dcfce7 100%);
-      border: 2px solid #bfdbfe;
-      overflow: hidden;
-    }
-
-    .cloud {
-      position: absolute;
-      font-size: 26px;
-      opacity: .8;
-      animation: floatCloud 10s linear infinite;
-    }
-
-    .cloud.c1 { top: 10px; left: -30px; animation-duration: 12s; }
-    .cloud.c2 { top: 36px; left: -80px; animation-duration: 16s; }
-
-    @keyframes floatCloud {
-      from { transform: translateX(0); }
-      to { transform: translateX(560px); }
-    }
-
-    .rail {
-      position: absolute;
-      left: 14px;
-      right: 14px;
-      bottom: 34px;
-      height: 10px;
-      background: #6b7280;
-      border-radius: 8px;
-    }
-
-    .rail::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: -6px;
-      bottom: -6px;
-      background:
-        repeating-linear-gradient(
-          90deg,
-          transparent 0 12px,
-          #8b5e34 12px 26px,
-          transparent 26px 42px
-        );
-      z-index: -1;
-      opacity: .9;
-    }
-
-    .stations {
-      position: absolute;
-      left: 14px;
-      right: 14px;
-      bottom: 22px;
-      display: flex;
-      justify-content: space-between;
-      pointer-events: none;
-    }
-
-    .station {
-      width: 34px;
-      text-align: center;
-      transform: translateX(-50%);
-    }
-
-    .station:last-child .station-badge {
-      background: #fef3c7;
-      color: #92400e;
-      border-color: #fcd34d;
-    }
-
-    .station-badge {
-      margin: 0 auto 6px;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: white;
-      border: 2px solid #93c5fd;
-      display: grid;
-      place-items: center;
-      font-size: 14px;
-      font-weight: 900;
-    }
-
-    .station-label {
-      font-size: 10px;
-      font-weight: 700;
-      color: #334155;
-      white-space: nowrap;
-    }
-
-    .train {
-      position: absolute;
-      left: 20px;
-      bottom: 44px;
-      font-size: 42px;
-      transition: transform .55s cubic-bezier(.2,.8,.2,1.05);
-      filter: drop-shadow(0 6px 6px rgba(0,0,0,.12));
-    }
-
-    .question {
-      text-align: center;
-      display: grid;
-      gap: 10px;
-    }
-
-    .question-kicker {
-      color: var(--accent);
-      font-weight: 800;
-      font-size: 14px;
-      letter-spacing: .08em;
-    }
-
-    .question-text {
-      margin: 0;
-      font-size: 30px;
-      line-height: 1.3;
-      font-weight: 900;
-    }
-
-    .choices {
-      display: grid;
-      gap: 12px;
-    }
-
-    .choice-btn {
-      background: white;
-      border: 3px solid #fdba74;
-      color: #7c2d12;
-      min-height: 72px;
-    }
-
-    .choice-btn.correct {
-      background: #dcfce7;
-      border-color: #86efac;
-      color: #166534;
-    }
-
-    .choice-btn.wrong {
-      background: #fee2e2;
-      border-color: #fca5a5;
-      color: #991b1b;
-    }
-
-    .feedback {
-      min-height: 56px;
-      border-radius: 16px;
-      display: grid;
-      place-items: center;
-      font-weight: 900;
-      font-size: 22px;
-      text-align: center;
-      padding: 8px;
-    }
-
-    .feedback.good { background: #dcfce7; color: #166534; }
-    .feedback.bad { background: #fee2e2; color: #991b1b; }
-    .feedback.neutral { background: #f8fafc; color: #475569; border: 2px dashed #cbd5e1; }
-
-    .stars {
-      font-size: 28px;
-      letter-spacing: 4px;
-      text-align: center;
-      min-height: 40px;
-    }
-
-    .result-emoji {
-      font-size: 72px;
-      text-align: center;
-    }
-
-    .result-title {
-      text-align: center;
-      font-size: 34px;
-      font-weight: 900;
-      margin: 0;
-    }
-
-    .result-copy {
-      text-align: center;
-      color: var(--sub);
-      font-size: 17px;
-      line-height: 1.6;
-      margin: 0;
-    }
-
-
     .route-banner {
       background: linear-gradient(90deg, #dbeafe 0%, #eff6ff 100%);
       border: 2px solid #93c5fd;
       color: #1e3a8a;
       border-radius: 16px;
-      padding: 10px 14px;
+      padding: 12px 14px;
       font-weight: 900;
       text-align: center;
       font-size: 15px;
-      box-shadow: var(--shadow);
-    }
-
-    .tiny {
-      font-size: 12px;
-      color: var(--sub);
-      text-align: center;
       line-height: 1.5;
     }
+    .tiny { font-size: 12px; color: var(--sub); line-height: 1.6; text-align: center; }
+    .hud { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .pill {
+      background: white; border: 2px solid #bfdbfe; border-radius: 18px; padding: 10px 12px; text-align: center;
+    }
+    .pill-label { display: block; color: var(--sub); font-size: 12px; margin-bottom: 4px; }
+    .pill-value { display: block; font-weight: 900; font-size: 18px; }
+    .track-wrap { overflow: hidden; }
+    .track {
+      position: relative; height: 154px; margin-top: 6px; border-radius: 18px;
+      background: linear-gradient(180deg, #dbeafe 0%, #eff6ff 36%, #dcfce7 36%, #dcfce7 100%);
+      border: 2px solid #bfdbfe; overflow: hidden;
+    }
+    .cloud {
+      position: absolute; font-size: 26px; opacity: .8; animation: floatCloud 12s linear infinite;
+    }
+    .cloud.c1 { top: 12px; left: -30px; }
+    .cloud.c2 { top: 38px; left: -90px; animation-duration: 16s; }
+    @keyframes floatCloud { from { transform: translateX(0); } to { transform: translateX(560px); } }
+    .rail {
+      position: absolute; left: 14px; right: 14px; bottom: 42px; height: 10px; background: #64748b; border-radius: 8px;
+    }
+    .rail::before {
+      content: ""; position: absolute; left: 0; right: 0; top: -6px; bottom: -6px;
+      background: repeating-linear-gradient(90deg, transparent 0 12px, #8b5e34 12px 26px, transparent 26px 42px);
+      z-index: -1; opacity: .9;
+    }
+    .stations {
+      position: absolute; left: 14px; right: 14px; bottom: 28px; display: flex; justify-content: space-between; pointer-events: none;
+    }
+    .station { width: 56px; text-align: center; transform: translateX(-50%); }
+    .station-badge {
+      margin: 0 auto 6px; width: 28px; height: 28px; border-radius: 50%; background: white;
+      border: 2px solid #93c5fd; display: grid; place-items: center; font-size: 13px; font-weight: 900;
+    }
+    .station-label { font-size: 10px; font-weight: 800; color: #334155; line-height: 1.15; white-space: nowrap; }
+    .station.major .station-badge { background: #fef3c7; border-color: #fbbf24; color: #92400e; }
+    .station.current .station-badge { background: #dbeafe; border-color: #2563eb; color: #1d4ed8; transform: scale(1.08); }
+    .train {
+      position: absolute; left: 20px; bottom: 52px; font-size: 42px;
+      transition: transform .6s cubic-bezier(.2,.8,.2,1.05); filter: drop-shadow(0 6px 6px rgba(0,0,0,.12));
+    }
+    .question { text-align: center; display: grid; gap: 10px; }
+    .question-kicker { color: var(--primary); font-weight: 800; font-size: 14px; letter-spacing: .08em; }
+    .current-place { font-size: 16px; font-weight: 800; color: #1e3a8a; }
+    .question-text { margin: 0; font-size: 30px; line-height: 1.32; font-weight: 900; }
+    .choices { display: grid; gap: 12px; }
+    .choice-btn {
+      background: white; border: 3px solid #fdba74; color: #7c2d12; min-height: 72px; font-size: 22px; padding: 14px 12px;
+    }
+    .choice-btn.correct { background: #dcfce7; border-color: #86efac; color: #166534; }
+    .choice-btn.wrong { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+    .feedback {
+      min-height: 56px; border-radius: 16px; display: grid; place-items: center; font-weight: 900; font-size: 22px;
+      text-align: center; padding: 8px 10px; line-height: 1.35;
+    }
+    .feedback.good { background: #dcfce7; color: #166534; }
+    .feedback.bad { background: #fee2e2; color: #991b1b; }
+    .feedback.neutral { background: #f8fafc; color: #475569; border: 2px dashed #cbd5e1; }
+    .event-chip {
+      display: inline-block; margin-top: 6px; padding: 6px 10px; border-radius: 999px; font-size: 14px; font-weight: 900;
+      background: #fef3c7; color: #92400e;
+    }
+    .stars { font-size: 28px; letter-spacing: 4px; text-align: center; min-height: 40px; }
+    .result-emoji { font-size: 72px; text-align: center; }
+    .result-title { text-align: center; font-size: 34px; font-weight: 900; margin: 0; }
+    .result-copy { text-align: center; color: var(--sub); font-size: 17px; line-height: 1.6; margin: 0; }
   </style>
 </head>
 <body>
   <div class="app">
     <section id="screen-start" class="card hero">
-      <div class="hero-train">🚃✨</div>
+      <div class="hero-train">🚃💨</div>
       <div>
-        <h1 class="title">おだきゅうで ゴー！</h1>
-        <p class="subtitle">すうじをえらんで、まちだを とおって<br>しんじゅくまで すすめよう！</p>
+        <h1 class="title">おだきゅう<br>かいそくきゅうこう！</h1>
+        <p class="subtitle">まちだから しんじゅくまで、<br>かいそくきゅうこう の とまる えきを あてよう！</p>
       </div>
-      <button id="startBtn" class="start-btn">はじめる</button>
-      <button id="speakHelpBtn" class="secondary-btn">よみあげる</button>
-      <p class="tiny">まちだや しんじゅく がでてくる、おだきゅう ごっこゲーム！</p>
+      <div class="route-banner">まちだ → しんゆりがおか → のぼりと → しもきたざわ → しんじゅく</div>
+      <button id="startBtn" class="start-btn">しゅっぱつ！</button>
+      <button id="speakHelpBtn" class="secondary-btn">せつめいを よみあげる</button>
+      <p class="tiny">まちだは スタート。ゴールは しんじゅく。<br>せいかいすると でんしゃが つぎの えきへ すすむよ！</p>
     </section>
 
     <section id="screen-game" class="hidden">
       <div class="hud">
-        <div class="pill"><span class="pill-label">もんだい</span><span id="qIndex" class="pill-value">1 / 10</span></div>
+        <div class="pill"><span class="pill-label">いま</span><span id="currentStationHud" class="pill-value">まちだ</span></div>
         <div class="pill"><span class="pill-label">せいかい</span><span id="score" class="pill-value">0</span></div>
-        <div class="pill"><span class="pill-label">のこり</span><span id="remaining" class="pill-value">0</span></div>
+        <div class="pill"><span class="pill-label">のこり</span><span id="remaining" class="pill-value">4</span></div>
       </div>
 
       <div class="card track-wrap">
@@ -388,23 +199,24 @@
         </div>
       </div>
 
-      <div class="route-banner">しんゆりがおか → まちだ → さがみおおの → しんじゅく</div>
+      <div class="route-banner">かいそくきゅうこう ルート： まちだ → しんゆりがおか → のぼりと → しもきたざわ → しんじゅく</div>
 
       <div class="card question">
         <div class="question-kicker">おだきゅう クイズ</div>
-        <h2 id="questionText" class="question-text">もんだい</h2>
+        <div id="currentPlace" class="current-place">いま：まちだ</div>
+        <h2 id="questionText" class="question-text">つぎに とまる えきは？</h2>
         <button id="readQuestionBtn" class="secondary-btn">もんだいを よみあげる</button>
       </div>
 
       <div id="choices" class="choices"></div>
-      <div id="feedback" class="feedback neutral">すうじを えらぼう！</div>
+      <div id="feedback" class="feedback neutral">えらんでみよう！</div>
       <div id="stars" class="stars"></div>
     </section>
 
     <section id="screen-result" class="card hero hidden">
       <div id="resultEmoji" class="result-emoji">🏆</div>
       <div>
-        <h2 id="resultTitle" class="result-title">ゴール！</h2>
+        <h2 id="resultTitle" class="result-title">しんじゅく とうちゃく！</h2>
         <p id="resultCopy" class="result-copy">よくできたね！</p>
       </div>
       <div id="resultStars" class="stars">⭐️⭐️⭐️</div>
@@ -413,17 +225,75 @@
   </div>
 
   <script>
+    const stations = [
+      { id: 'machida', label: 'まちだ', major: true, event: 'スタート！ かいそくきゅうこう しゅっぱつ！' },
+      { id: 'shin-yurigaoka', label: 'しんゆりがおか', major: true, event: 'たません のりかええき！' },
+      { id: 'noborito', label: 'のぼりと', major: true, event: 'なんぶせん のりかえ！' },
+      { id: 'shimokitazawa', label: 'しもきたざわ', major: true, event: 'おしゃれタウン！' },
+      { id: 'shinjuku', label: 'しんじゅく', major: true, event: 'ゴール！ しんじゅく とうちゃく！' }
+    ];
+
     const questions = [
-      { type: 'remain', trackLength: 5, current: 0, goal: 1, prompt: 'しんゆりを でて あと いくつ？', choices: [1, 2, 3], answer: 1 },
-      { type: 'remain', trackLength: 5, current: 0, goal: 2, prompt: 'まちだまで あと いくつ？', choices: [1, 2, 3], answer: 2 },
-      { type: 'remain', trackLength: 6, current: 0, goal: 3, prompt: 'まちだを とおるには あと いくつ？', choices: [2, 3, 4], answer: 3 },
-      { type: 'remain', trackLength: 7, current: 1, goal: 4, prompt: 'いま 1 のえき。まちだまで あと いくつ？', choices: [2, 3, 4], answer: 3 },
-      { type: 'remain', trackLength: 8, current: 2, goal: 5, prompt: 'いま 2 のえき。さがみおおのまで あと いくつ？', choices: [2, 3, 4], answer: 3 },
-      { type: 'add', trackLength: 6, current: 0, goal: 2, prompt: '1 + 1 で まちだまで いける？', choices: [1, 2, 3], answer: 2 },
-      { type: 'add', trackLength: 7, current: 0, goal: 3, prompt: '1 + 2 で どこまで すすめる？', choices: [2, 3, 4], answer: 3 },
-      { type: 'add', trackLength: 8, current: 0, goal: 4, prompt: '2 + 2 で まちだを こえられる？', choices: [3, 4, 5], answer: 4 },
-      { type: 'remain', trackLength: 10, current: 3, goal: 7, prompt: 'いま まちだの ちかく。しんじゅくまで あと いくつ？', choices: [3, 4, 5], answer: 4 },
-      { type: 'remain', trackLength: 11, current: 4, goal: 9, prompt: 'しんじゅくまで ラスト！ あと いくつ？', choices: [4, 5, 6], answer: 5 }
+      {
+        kind: 'next-station',
+        from: 0,
+        prompt: 'つぎに とまる えきは？',
+        choices: ['しんゆりがおか', 'たまがわがくえんまえ', 'さがみおおの'],
+        answer: 'しんゆりがおか',
+        nextIndex: 1,
+        success: 'せいかい！ しんゆりがおか！',
+        speech: 'まちだの つぎに とまる えきは どこかな？'
+      },
+      {
+        kind: 'count-stations',
+        from: 0,
+        prompt: 'まちだから しんゆりがおか まで いくつ？',
+        choices: ['1', '2', '3'],
+        answer: '1',
+        nextIndex: 1,
+        success: 'せいかい！ 1えき すすむ！',
+        speech: 'まちだから しんゆりがおかまで いくつかな？'
+      },
+      {
+        kind: 'next-station',
+        from: 1,
+        prompt: 'つぎに とまる えきは？',
+        choices: ['のぼりと', 'よみうりランドまえ', 'むこうがおかゆうえん'],
+        answer: 'のぼりと',
+        nextIndex: 2,
+        success: 'せいかい！ のぼりと！',
+        speech: 'しんゆりがおかの つぎに とまる えきは どこかな？'
+      },
+      {
+        kind: 'line-info',
+        from: 1,
+        prompt: 'しんゆりがおか で つながるのは？',
+        choices: ['たません', 'えのしません', 'やまのてせん'],
+        answer: 'たません',
+        nextIndex: 2,
+        success: 'せいかい！ たません！',
+        speech: 'しんゆりがおかで つながる せんは どれかな？'
+      },
+      {
+        kind: 'next-station',
+        from: 2,
+        prompt: 'つぎに とまる えきは？',
+        choices: ['しもきたざわ', 'むこうがおかゆうえん', 'いくた'],
+        answer: 'しもきたざわ',
+        nextIndex: 3,
+        success: 'せいかい！ しもきたざわ！',
+        speech: 'のぼりとの つぎに とまる えきは どこかな？'
+      },
+      {
+        kind: 'next-station',
+        from: 3,
+        prompt: 'ゴールの えきは どこ？',
+        choices: ['しんじゅく', 'よよぎうえはら', 'せいじょうがくえんまえ'],
+        answer: 'しんじゅく',
+        nextIndex: 4,
+        success: 'せいかい！ しんじゅく！',
+        speech: 'しもきたざわの つぎの ゴールえきは どこかな？'
+      }
     ];
 
     const screenStart = document.getElementById('screen-start');
@@ -433,9 +303,10 @@
     const speakHelpBtn = document.getElementById('speakHelpBtn');
     const retryBtn = document.getElementById('retryBtn');
     const readQuestionBtn = document.getElementById('readQuestionBtn');
-    const qIndex = document.getElementById('qIndex');
+    const currentStationHud = document.getElementById('currentStationHud');
     const scoreEl = document.getElementById('score');
     const remainingEl = document.getElementById('remaining');
+    const currentPlace = document.getElementById('currentPlace');
     const questionText = document.getElementById('questionText');
     const choicesEl = document.getElementById('choices');
     const feedbackEl = document.getElementById('feedback');
@@ -449,6 +320,7 @@
 
     let currentIndex = 0;
     let score = 0;
+    let currentStationIndex = 0;
     let locked = false;
 
     function speak(text) {
@@ -457,7 +329,7 @@
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'ja-JP';
       utterance.rate = 0.92;
-      utterance.pitch = 1.08;
+      utterance.pitch = 1.06;
       window.speechSynthesis.speak(utterance);
     }
 
@@ -470,51 +342,46 @@
       if (name === 'result') screenResult.classList.remove('hidden');
     }
 
-    function buildStations(trackLength, goal) {
+    function buildStations() {
       stationsEl.innerHTML = '';
-      const machidaIndex = Math.max(1, Math.floor(trackLength / 2));
-      const sagamiIndex = Math.max(machidaIndex + 1, trackLength - 2);
-
-      for (let i = 0; i <= trackLength; i++) {
-        const station = document.createElement('div');
-        station.className = 'station';
-        station.style.left = `${(i / trackLength) * 100}%`;
-
-        let label = 'えき';
-        if (i === 0) label = 'しんゆり';
-        else if (i === machidaIndex) label = 'まちだ';
-        else if (i === sagamiIndex && sagamiIndex < trackLength) label = 'さがみ';
-        if (i === goal) label = 'ゴール';
-
-        station.innerHTML = `
-          <div class="station-badge">${i}</div>
-          <div class="station-label">${label}</div>
+      const total = stations.length - 1;
+      stations.forEach((station, idx) => {
+        const el = document.createElement('div');
+        el.className = 'station' + (station.major ? ' major' : '') + (idx === currentStationIndex ? ' current' : '');
+        el.style.left = `${(idx / total) * 100}%`;
+        el.innerHTML = `
+          <div class="station-badge">${idx + 1}</div>
+          <div class="station-label">${station.label}</div>
         `;
-        stationsEl.appendChild(station);
-      }
+        stationsEl.appendChild(el);
+      });
     }
 
-    function moveTrain(current, trackLength) {
-      const min = 0;
+    function moveTrain(index) {
       const maxPx = 320;
-      const x = min + (maxPx * (current / trackLength));
+      const total = stations.length - 1;
+      const x = maxPx * (index / total);
       trainEl.style.transform = `translateX(${x}px)`;
+    }
+
+    function setFeedbackNeutral(text='えらんでみよう！') {
+      feedbackEl.className = 'feedback neutral';
+      feedbackEl.textContent = text;
     }
 
     function renderQuestion() {
       const q = questions[currentIndex];
       locked = false;
-      qIndex.textContent = `${currentIndex + 1} / ${questions.length}`;
+      currentStationHud.textContent = stations[currentStationIndex].label;
       scoreEl.textContent = score;
-      remainingEl.textContent = q.goal - q.current;
+      remainingEl.textContent = Math.max(0, (stations.length - 1) - currentStationIndex);
+      currentPlace.textContent = `いま：${stations[currentStationIndex].label}`;
       questionText.textContent = q.prompt;
-      feedbackEl.className = 'feedback neutral';
-      feedbackEl.textContent = 'すうじを えらぼう！';
+      setFeedbackNeutral();
       starsEl.textContent = '⭐️'.repeat(score);
-      buildStations(q.trackLength, q.goal);
-      moveTrain(q.current, q.trackLength);
+      buildStations();
+      moveTrain(currentStationIndex);
       choicesEl.innerHTML = '';
-
       q.choices.forEach(choice => {
         const btn = document.createElement('button');
         btn.className = 'choice-btn';
@@ -529,51 +396,53 @@
       locked = true;
       const q = questions[currentIndex];
       const buttons = Array.from(document.querySelectorAll('.choice-btn'));
-
       if (choice === q.answer) {
         score += 1;
+        currentStationIndex = q.nextIndex;
         btn.classList.add('correct');
         feedbackEl.className = 'feedback good';
-        feedbackEl.textContent = currentIndex >= 1 ? 'せいかい！ まちだへ しゅっぱつ！' : 'せいかい！ しゅっぱつ！';
-        moveTrain(q.goal, q.trackLength);
-        speak(`せいかい！ ${q.answer} で しゅっぱつ！`);
+        const event = stations[currentStationIndex].event;
+        feedbackEl.innerHTML = `${q.success}<br><span class="event-chip">${event}</span>`;
+        buildStations();
+        moveTrain(currentStationIndex);
+        speak(`${q.success} ${event}`);
       } else {
         btn.classList.add('wrong');
-        const correctBtn = buttons.find(b => Number(b.textContent) === q.answer);
+        const correctBtn = buttons.find(b => b.textContent === q.answer);
         if (correctBtn) correctBtn.classList.add('correct');
         feedbackEl.className = 'feedback bad';
-        feedbackEl.textContent = `ざんねん。こたえは ${q.answer}！ もういちど！`;
+        feedbackEl.textContent = `ざんねん！ こたえは ${q.answer}`;
         speak(`ざんねん。こたえは ${q.answer}`);
       }
-
       scoreEl.textContent = score;
       starsEl.textContent = '⭐️'.repeat(score);
+      remainingEl.textContent = Math.max(0, (stations.length - 1) - currentStationIndex);
 
       setTimeout(() => {
         currentIndex += 1;
-        if (currentIndex >= questions.length) {
+        if (currentIndex >= questions.length || currentStationIndex === stations.length - 1) {
           showResult();
         } else {
           renderQuestion();
         }
-      }, 1300);
+      }, 1500);
     }
 
     function showResult() {
       showScreen('result');
       const ratio = score / questions.length;
-      if (ratio === 1) {
+      if (currentStationIndex === stations.length - 1 && ratio >= 0.8) {
         resultEmoji.textContent = '🏆';
         resultTitle.textContent = 'しんじゅく とうちゃく！';
-        resultCopy.textContent = `10もん ぜんぶ せいかい！ おだきゅう マスターだね！`;
-      } else if (ratio >= 0.7) {
+        resultCopy.textContent = `${questions.length}もんちゅう ${score}もん せいかい！ かいそくきゅうこう マスター！`;
+      } else if (currentStationIndex >= 3) {
         resultEmoji.textContent = '🚃🌟';
-        resultTitle.textContent = 'まちだ つうか！';
-        resultCopy.textContent = `${questions.length}もんちゅう ${score}もん せいかい！ しんじゅくまで あと すこし！`;
+        resultTitle.textContent = 'しもきたざわ まで きた！';
+        resultCopy.textContent = `${questions.length}もんちゅう ${score}もん せいかい！ つぎは しんじゅくを めざそう！`;
       } else {
         resultEmoji.textContent = '😊';
-        resultTitle.textContent = 'また のろう！';
-        resultCopy.textContent = `${questions.length}もんちゅう ${score}もん せいかい！ つぎは まちだを めざそう！`;
+        resultTitle.textContent = 'また しゅっぱつ！';
+        resultCopy.textContent = `${questions.length}もんちゅう ${score}もん せいかい！ まちだから もういちど やってみよう！`;
       }
       resultStars.textContent = '⭐️'.repeat(Math.max(1, Math.ceil(score / 2)));
       speak(resultTitle.textContent);
@@ -582,17 +451,18 @@
     function startGame() {
       currentIndex = 0;
       score = 0;
+      currentStationIndex = 0;
       showScreen('game');
       renderQuestion();
-      speak('おだきゅうで ゴー！ まちだを とおって しんじゅくまで いこう！');
+      speak('まちだから しんじゅくまで しゅっぱつ！ かいそくきゅうこう の とまる えきを あてよう！');
     }
 
     startBtn.addEventListener('click', startGame);
     retryBtn.addEventListener('click', startGame);
-    speakHelpBtn.addEventListener('click', () => speak('すうじをえらんで、まちだを とおって しんじゅくまで すすめよう。じゅうもん せいかいできるかな？'));
+    speakHelpBtn.addEventListener('click', () => speak('まちだから しんじゅくまで かいそくきゅうこう の とまる えきを あてるゲームだよ。せいかいすると でんしゃが つぎの えきへ すすむよ。'));
     readQuestionBtn.addEventListener('click', () => {
       const q = questions[currentIndex];
-      if (q) speak(q.prompt);
+      if (q) speak(q.speech || q.prompt);
     });
 
     if ('serviceWorker' in navigator) {
