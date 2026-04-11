@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#1d4ed8" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="快速急行ゲーム" />
+  <meta name="apple-mobile-web-app-title" content="快速急行ゲーム2" />
   <title>おだきゅう かいそくきゅうこう！</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icon-192.png" />
@@ -176,17 +176,17 @@
         <h1 class="title">おだきゅう<br>かいそくきゅうこう！</h1>
         <p class="subtitle">まちだから しんじゅくまで、<br>かいそくきゅうこう の とまる えきを あてよう！</p>
       </div>
-      <div class="route-banner">まちだ → しんゆりがおか → のぼりと → しもきたざわ → しんじゅく</div>
+      <div class="route-banner">まちだ → しんゆりがおか → のぼりと → しもきたざわ → よよぎうえはら → しんじゅく</div>
       <button id="startBtn" class="start-btn">しゅっぱつ！</button>
       <button id="speakHelpBtn" class="secondary-btn">せつめいを よみあげる</button>
-      <p class="tiny">まちだは スタート。ゴールは しんじゅく。<br>せいかいすると でんしゃが つぎの えきへ すすむよ！</p>
+      <p class="tiny">まちだは スタート。ゴールは しんじゅく。<br>せいかいすると でんしゃが すすんで、ロマンスカーふうチャイムが なるよ！</p>
     </section>
 
     <section id="screen-game" class="hidden">
       <div class="hud">
         <div class="pill"><span class="pill-label">いま</span><span id="currentStationHud" class="pill-value">まちだ</span></div>
         <div class="pill"><span class="pill-label">せいかい</span><span id="score" class="pill-value">0</span></div>
-        <div class="pill"><span class="pill-label">のこり</span><span id="remaining" class="pill-value">4</span></div>
+        <div class="pill"><span class="pill-label">のこり</span><span id="remaining" class="pill-value">5</span></div>
       </div>
 
       <div class="card track-wrap">
@@ -199,7 +199,7 @@
         </div>
       </div>
 
-      <div class="route-banner">かいそくきゅうこう ルート： まちだ → しんゆりがおか → のぼりと → しもきたざわ → しんじゅく</div>
+      <div class="route-banner">かいそくきゅうこう ルート： まちだ → しんゆりがおか → のぼりと → しもきたざわ → よよぎうえはら → しんじゅく</div>
 
       <div class="card question">
         <div class="question-kicker">おだきゅう クイズ</div>
@@ -230,6 +230,7 @@
       { id: 'shin-yurigaoka', label: 'しんゆりがおか', major: true, event: 'たません のりかええき！' },
       { id: 'noborito', label: 'のぼりと', major: true, event: 'なんぶせん のりかえ！' },
       { id: 'shimokitazawa', label: 'しもきたざわ', major: true, event: 'おしゃれタウン！' },
+      { id: 'yoyogi-uehara', label: 'よよぎうえはら', major: true, event: 'ちよだせん ちょくつう の ぶんきてん！' },
       { id: 'shinjuku', label: 'しんじゅく', major: true, event: 'ゴール！ しんじゅく とうちゃく！' }
     ];
 
@@ -245,14 +246,14 @@
         speech: 'まちだの つぎに とまる えきは どこかな？'
       },
       {
-        kind: 'count-stations',
-        from: 0,
-        prompt: 'まちだから しんゆりがおか まで いくつ？',
-        choices: ['1', '2', '3'],
-        answer: '1',
-        nextIndex: 1,
-        success: 'せいかい！ 1えき すすむ！',
-        speech: 'まちだから しんゆりがおかまで いくつかな？'
+        kind: 'line-info',
+        from: 1,
+        prompt: 'しんゆりがおか で つながるのは？',
+        choices: ['たません', 'えのしません', 'やまのてせん'],
+        answer: 'たません',
+        nextIndex: 2,
+        success: 'せいかい！ たません！',
+        speech: 'しんゆりがおかで つながる せんは どれかな？'
       },
       {
         kind: 'next-station',
@@ -263,16 +264,6 @@
         nextIndex: 2,
         success: 'せいかい！ のぼりと！',
         speech: 'しんゆりがおかの つぎに とまる えきは どこかな？'
-      },
-      {
-        kind: 'line-info',
-        from: 1,
-        prompt: 'しんゆりがおか で つながるのは？',
-        choices: ['たません', 'えのしません', 'やまのてせん'],
-        answer: 'たません',
-        nextIndex: 2,
-        success: 'せいかい！ たません！',
-        speech: 'しんゆりがおかで つながる せんは どれかな？'
       },
       {
         kind: 'next-station',
@@ -287,12 +278,22 @@
       {
         kind: 'next-station',
         from: 3,
-        prompt: 'ゴールの えきは どこ？',
-        choices: ['しんじゅく', 'よよぎうえはら', 'せいじょうがくえんまえ'],
-        answer: 'しんじゅく',
+        prompt: 'つぎに とまる えきは？',
+        choices: ['よよぎうえはら', 'しんじゅく', 'せいじょうがくえんまえ'],
+        answer: 'よよぎうえはら',
         nextIndex: 4,
+        success: 'せいかい！ よよぎうえはら！',
+        speech: 'しもきたざわの つぎに とまる えきは どこかな？'
+      },
+      {
+        kind: 'next-station',
+        from: 4,
+        prompt: 'ゴールの えきは どこ？',
+        choices: ['しんじゅく', 'なんしんじゅく', 'せいじょうがくえんまえ'],
+        answer: 'しんじゅく',
+        nextIndex: 5,
         success: 'せいかい！ しんじゅく！',
-        speech: 'しもきたざわの つぎの ゴールえきは どこかな？'
+        speech: 'よよぎうえはらの つぎの ゴールえきは どこかな？'
       }
     ];
 
@@ -331,6 +332,27 @@
       utterance.rate = 0.92;
       utterance.pitch = 1.06;
       window.speechSynthesis.speak(utterance);
+    }
+
+    function playRomancecarStyleChime() {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const now = ctx.currentTime + 0.03;
+      const notes = [987.77, 1318.51, 1567.98, 1318.51];
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.0001, now + i * 0.18);
+        gain.gain.exponentialRampToValueAtTime(0.16, now + i * 0.18 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.18 + 0.16);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(now + i * 0.18);
+        osc.stop(now + i * 0.18 + 0.18);
+      });
+      setTimeout(() => ctx.close().catch(() => {}), 1400);
     }
 
     function showScreen(name) {
@@ -405,6 +427,7 @@
         feedbackEl.innerHTML = `${q.success}<br><span class="event-chip">${event}</span>`;
         buildStations();
         moveTrain(currentStationIndex);
+        playRomancecarStyleChime();
         speak(`${q.success} ${event}`);
       } else {
         btn.classList.add('wrong');
@@ -435,9 +458,9 @@
         resultEmoji.textContent = '🏆';
         resultTitle.textContent = 'しんじゅく とうちゃく！';
         resultCopy.textContent = `${questions.length}もんちゅう ${score}もん せいかい！ かいそくきゅうこう マスター！`;
-      } else if (currentStationIndex >= 3) {
+      } else if (currentStationIndex >= 4) {
         resultEmoji.textContent = '🚃🌟';
-        resultTitle.textContent = 'しもきたざわ まで きた！';
+        resultTitle.textContent = 'よよぎうえはら まで きた！';
         resultCopy.textContent = `${questions.length}もんちゅう ${score}もん せいかい！ つぎは しんじゅくを めざそう！`;
       } else {
         resultEmoji.textContent = '😊';
