@@ -718,25 +718,15 @@ blds.style.opacity = ‘0’;
 
 /* ===================================================
 SCREEN SWITCH
-go() が呼ばれた瞬間、他の全画面を display:none に。
-ターゲット画面だけ display:flex → .on でアニメ発火。
+.on クラスだけで制御。style.display は触らない。
+CSS: .scr { display:none }  .scr.on { display:flex }
 =================================================== */
 const PAGES = [‘pg-start’,‘pg-mode’,‘pg-question’,‘pg-depart’,‘pg-arrive’,‘pg-goal’];
 const $ = id => document.getElementById(id);
 
 function go(id) {
-PAGES.forEach(p => {
-const el = $(p);
-el.classList.remove(‘on’);
-el.style.display = ‘none’;
-});
-const target = $(id);
-target.style.display = ‘’;          // CSSの display:none を解除
-requestAnimationFrame(() =>
-requestAnimationFrame(() =>
-target.classList.add(‘on’)      // 2フレーム後にアニメ発火
-)
-);
+PAGES.forEach(p => $(p).classList.remove(‘on’));
+requestAnimationFrame(() => $(id).classList.add(‘on’));
 }
 
 /* ===================================================
