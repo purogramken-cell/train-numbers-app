@@ -9,7 +9,6 @@
 <meta name="apple-mobile-web-app-title" content="おだきゅうのたび">
 <meta name="theme-color" content="#003087">
 <title>おだきゅう でんしゃのたび</title>
-<link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
 /* ========================================
@@ -2167,11 +2166,28 @@ window.addEventListener('load', init);
 // Prevent scroll bounce on iOS
 document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
 
-// Service Worker 登録
+// Service Worker インライン登録（1ファイル完結版）
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {
-    // SW未対応環境ではスルー
-  });
+  const swCode = `
+const CACHE_NAME = 'odakyu-game-v1';
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    )
+  );
+  self.clients.claim();
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request).then(cached => cached || fetch(e.request))
+  );
+});
+  `;
+  const swBlob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swUrl).catch(() => {});
 }
 </script>
 
