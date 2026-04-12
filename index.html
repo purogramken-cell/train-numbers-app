@@ -1,689 +1,2179 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>おだきゅう たんけん！ v7</title>
-  <meta name="theme-color" content="#1f5fbf" />
-  <link rel="manifest" href="manifest.json" />
-  <style>
-    :root {
-      --bg1:#eef6ff; --bg2:#fffaf1; --panel:#ffffffee; --text:#17324d; --accent:#1f5fbf; --accent2:#ff9f1c;
-      --ok:#18a957; --warn:#f59e0b; --danger:#ef4444;
-    }
-    * { box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
-    body {
-      margin:0; font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic', sans-serif;
-      background: linear-gradient(180deg, var(--bg1), var(--bg2)); color:var(--text); min-height:100vh;
-    }
-    .app { max-width: 760px; margin: 0 auto; padding: 14px 14px 36px; }
-    .card { background: var(--panel); border-radius: 24px; padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.08); }
-    .hidden { display:none !important; }
-    h1,h2,h3,p { margin:0; }
-    .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
-    .title { font-size: 30px; font-weight: 900; letter-spacing: .02em; }
-    .tiny { font-size: 13px; opacity:.8; }
-    .pill { display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:999px; background:#fff; font-size:14px; font-weight:700; box-shadow: 0 4px 14px rgba(0,0,0,.06); }
-    .route { display:flex; gap:8px; overflow-x:auto; padding:6px 0 2px; }
-    .stop { min-width:110px; background:#fff; border:2px solid #dfe9f8; border-radius:18px; padding:10px; text-align:center; position:relative; }
-    .stop.current { border-color:var(--accent); transform: translateY(-2px); }
-    .stop.done { background:#eef9f0; border-color:#aee3bf; }
-    .stop .jp { font-weight:900; font-size:15px; }
-    .stop .land { font-size:22px; display:block; margin-bottom:4px; }
-    .connector { align-self:center; font-size:22px; opacity:.45; }
-    .hero { margin-top:12px; display:grid; grid-template-columns: 1.25fr .95fr; gap:12px; }
-    .station-box { min-height: 250px; position:relative; overflow:hidden; }
-    .station-badge { display:inline-block; background:rgba(255,255,255,.85); padding:6px 12px; border-radius:999px; font-size:14px; font-weight:800; margin-bottom:10px; }
-    .station-name { font-size: 34px; font-weight: 900; margin-bottom:8px; }
-    .station-desc { font-size: 18px; line-height:1.4; }
-    .announcement { margin-top:12px; background: rgba(255,255,255,.65); border:2px solid rgba(31,95,191,.14); border-radius:18px; padding:12px; font-size:18px; line-height:1.45; font-weight:800; }
-    .landmark { position:absolute; right:16px; bottom:12px; font-size:88px; opacity:.18; }
-    .sparkles { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
-    .sparkles span {
-      position:absolute; font-size:22px; animation: sparkle 1.6s ease forwards; opacity:0;
-    }
-    @keyframes sparkle {
-      0% { transform: translateY(8px) scale(.6); opacity:0; }
-      20% { opacity:1; }
-      100% { transform: translateY(-36px) scale(1.15); opacity:0; }
-    }
-    .train-panel { display:flex; flex-direction:column; gap:12px; justify-content:space-between; }
-    .train-track { position:relative; background:#f4f7fb; height:76px; border-radius:18px; overflow:hidden; border:2px solid #dfe9f8; }
-    .rail { position:absolute; left:0; right:0; top:50%; height:8px; background: repeating-linear-gradient(90deg,#7d8da1 0 16px,#cfd8e3 16px 28px); transform: translateY(-50%); opacity:.55; }
-    .train { position:absolute; top:18px; left:12px; font-size:40px; transition:left .6s ease; }
-    .goal-flag { position:absolute; right:10px; top:8px; font-size:28px; }
-    .meter { height:14px; background:#ecf1f9; border-radius:999px; overflow:hidden; }
-    .meter > div { height:100%; width:0%; background: linear-gradient(90deg,#1f5fbf,#5ea6ff); transition: width .5s ease; }
-    .stamps { display:flex; flex-wrap:wrap; gap:8px; }
-    .stamp { width:46px; height:46px; border-radius:50%; background:#f7f8fb; display:flex; align-items:center; justify-content:center; border:2px dashed #c7d6ea; font-size:20px; }
-    .stamp.on { background:#fff6da; border-style:solid; border-color:#ffd56a; }
-    .quiz { margin-top:12px; }
-    .quiz-head { display:flex; justify-content:space-between; gap:8px; align-items:center; margin-bottom:12px; }
-    .question-type { font-weight:900; color:var(--accent); }
-    .question-text { font-size: 28px; font-weight: 900; line-height:1.35; margin-bottom:14px; }
-    .choices { display:grid; gap:12px; }
-    button.choice, .bigbtn, .modebtn {
-      appearance:none; border:none; border-radius:20px; padding:18px 16px; background:#fff; color:var(--text);
-      font-size:24px; font-weight:900; box-shadow: 0 8px 20px rgba(0,0,0,.08); border:3px solid transparent;
-    }
-    button.choice:active, .bigbtn:active, .modebtn:active { transform: scale(.98); }
-    button.choice.hint { border-color: var(--warn); }
-    button.choice.correct { border-color: var(--ok); background:#eefbf2; }
-    button.choice.wrong { border-color: var(--danger); background:#fff1f2; }
-    .feedback { margin-top:12px; min-height:68px; display:flex; align-items:center; justify-content:center; text-align:center; font-size:24px; font-weight:900; }
-    .feedback.ok { color:var(--ok); }
-    .feedback.warn { color:#b45309; }
-    .bottom { margin-top:12px; display:flex; gap:12px; }
-    .bigbtn { flex:1; background: linear-gradient(180deg, #1f5fbf, #1b4f9f); color:#fff; }
-    .subbtn { background:#fff; color:var(--accent); }
-    .screen-center { min-height: calc(100vh - 50px); display:flex; flex-direction:column; justify-content:center; gap:18px; }
-    .modes { display:grid; gap:12px; }
-    .modebtn { text-align:left; }
-    .modebtn strong { display:block; font-size:24px; }
-    .modebtn span { display:block; font-size:15px; opacity:.8; margin-top:4px; font-weight:700; }
-    .goal-screen { text-align:center; }
-    .goal-emoji { font-size:88px; }
-    .goal-title { font-size:34px; font-weight:900; margin:8px 0; }
-    .mini { font-size:16px; opacity:.85; }
-    .unlock { background:#fff7d1; border:2px solid #f4d56c; padding:10px 12px; border-radius:18px; margin-top:10px; font-weight:900; }
-    .parent-note { margin-top:10px; font-size:12px; opacity:.72; text-align:center; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="おだきゅうのたび">
+<meta name="theme-color" content="#003087">
+<title>おだきゅう でんしゃのたび</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+/* ========================================
+   CSS VARIABLES & BASE
+======================================== */
+:root {
+  --odakyu-blue: #003087;
+  --odakyu-light: #0057b8;
+  --odakyu-accent: #e8f0ff;
+  --sky: #b8d9f8;
+  --sun: #ffd700;
+  --grass: #5cb85c;
+  --white: #ffffff;
+  --dark: #1a1a2e;
+  --gray: #6b7280;
+  --light-gray: #f0f4f8;
+  --success: #10b981;
+  --error: #ef4444;
+  --romance-gold: #c9a227;
+  --romance-deep: #8b0000;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 20px);
+}
 
-    .depart-badge, .arrival-ribbon {
-      position:absolute; left:50%; transform:translateX(-50%) scale(.7); top:8px;
-      background:linear-gradient(180deg,#fff9cf,#ffe27a); color:#7a4d00; border:2px solid #ffd56a;
-      border-radius:999px; padding:8px 16px; font-size:18px; font-weight:900; opacity:0; pointer-events:none;
-      box-shadow:0 8px 20px rgba(255,213,106,.35);
-    }
-    .arrival-ribbon { top:auto; bottom:10px; background:linear-gradient(180deg,#e9f5ff,#beddff); color:#124173; border-color:#9fc8ff; }
-    .show-badge { animation: badgePop .9s ease forwards; }
-    @keyframes badgePop {
-      0% { opacity:0; transform:translateX(-50%) scale(.7) translateY(10px); }
-      20% { opacity:1; transform:translateX(-50%) scale(1.08) translateY(0); }
-      80% { opacity:1; transform:translateX(-50%) scale(1); }
-      100% { opacity:0; transform:translateX(-50%) scale(.94) translateY(-4px); }
-    }
-    .train.pop { animation: trainPop .75s ease; }
-    .train.boost { animation: trainBoost .9s ease; }
-    @keyframes trainPop {
-      0% { transform:translateY(0) scale(1); }
-      35% { transform:translateY(-8px) scale(1.15) rotate(-3deg); }
-      100% { transform:translateY(0) scale(1); }
-    }
-    @keyframes trainBoost {
-      0% { transform:translateX(0) scale(1); filter:drop-shadow(0 0 0 rgba(255,215,0,0)); }
-      30% { transform:translateX(12px) scale(1.18); filter:drop-shadow(0 0 10px rgba(255,215,0,.9)); }
-      70% { transform:translateX(-4px) scale(1.05); }
-      100% { transform:translateX(0) scale(1); filter:drop-shadow(0 0 0 rgba(255,215,0,0)); }
-    }
-    .choice.shake { animation: shake .35s ease; }
-    @keyframes shake {
-      0%,100% { transform:translateX(0); }
-      25% { transform:translateX(-8px); }
-      50% { transform:translateX(8px); }
-      75% { transform:translateX(-5px); }
-    }
-    .feedback.pop { animation: feedbackPop .45s ease; }
-    @keyframes feedbackPop {
-      0% { transform:scale(.85); opacity:.4; }
-      100% { transform:scale(1); opacity:1; }
-    }
-    .station-box.flash { animation: cardFlash .7s ease; }
-    @keyframes cardFlash {
-      0% { box-shadow:0 0 0 rgba(255,214,106,0); }
-      40% { box-shadow:0 0 0 8px rgba(255,214,106,.28), 0 10px 30px rgba(0,0,0,.08); }
-      100% { box-shadow:0 10px 30px rgba(0,0,0,.08); }
-    }
+- {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  }
 
-    @media (max-width: 700px) {
-      .hero { grid-template-columns: 1fr; }
-      .station-name { font-size: 30px; }
-      .question-text { font-size:26px; }
-      button.choice { font-size:22px; }
-      .announcement { font-size:17px; }
-    }
-  </style>
+html, body {
+width: 100%;
+height: 100%;
+overflow: hidden;
+background: var(–odakyu-blue);
+font-family: ‘Hiragino Maru Gothic ProN’, ‘Hiragino Kaku Gothic ProN’, ‘BIZ UDPGothic’, sans-serif;
+}
+
+body {
+display: flex;
+justify-content: center;
+align-items: flex-start;
+background: #000;
+}
+
+#app {
+width: 100%;
+max-width: 430px;
+height: 100dvh;
+position: relative;
+overflow: hidden;
+background: var(–odakyu-blue);
+}
+
+/* ========================================
+SCREENS
+======================================== */
+.screen {
+position: absolute;
+inset: 0;
+display: none;
+flex-direction: column;
+align-items: center;
+opacity: 0;
+transition: opacity 0.4s ease;
+}
+
+.screen.active {
+display: flex;
+opacity: 1;
+}
+
+.screen.fade-in {
+animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(20px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========================================
+SCREEN 1: START
+======================================== */
+#screen-start {
+background: linear-gradient(180deg, #001a5c 0%, #003087 40%, #0057b8 100%);
+padding-top: calc(var(–safe-top) + 20px);
+padding-bottom: calc(var(–safe-bottom) + 20px);
+justify-content: space-between;
+}
+
+.start-sky {
+width: 100%;
+height: 200px;
+position: relative;
+overflow: hidden;
+flex-shrink: 0;
+}
+
+.star {
+position: absolute;
+background: white;
+border-radius: 50%;
+animation: twinkle 2s infinite alternate;
+}
+
+@keyframes twinkle {
+from { opacity: 0.3; transform: scale(1); }
+to { opacity: 1; transform: scale(1.3); }
+}
+
+.start-title-area {
+text-align: center;
+padding: 0 24px;
+flex: 1;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+gap: 16px;
+}
+
+.start-logo {
+background: rgba(255,255,255,0.12);
+border: 2px solid rgba(255,255,255,0.3);
+border-radius: 20px;
+padding: 10px 24px;
+color: rgba(255,255,255,0.85);
+font-size: 12px;
+letter-spacing: 3px;
+font-weight: 600;
+}
+
+.start-title {
+color: white;
+font-size: 32px;
+font-weight: 900;
+line-height: 1.3;
+letter-spacing: -0.5px;
+text-shadow: 0 2px 20px rgba(0,0,0,0.4);
+}
+
+.start-title span {
+display: block;
+font-size: 20px;
+font-weight: 600;
+opacity: 0.85;
+letter-spacing: 2px;
+margin-top: 4px;
+}
+
+.start-train-scene {
+width: 100%;
+height: 120px;
+position: relative;
+overflow: hidden;
+flex-shrink: 0;
+}
+
+.start-track {
+position: absolute;
+bottom: 20px;
+left: 0;
+right: 0;
+height: 6px;
+background: repeating-linear-gradient(90deg,
+#888 0px, #888 20px, transparent 20px, transparent 30px);
+}
+
+.start-train {
+position: absolute;
+bottom: 26px;
+left: 50%;
+transform: translateX(-50%);
+display: flex;
+gap: 2px;
+animation: trainIdle 2s ease-in-out infinite;
+}
+
+@keyframes trainIdle {
+0%, 100% { transform: translateX(-50%) translateY(0); }
+50% { transform: translateX(-50%) translateY(-3px); }
+}
+
+.start-bottom {
+width: 100%;
+padding: 0 24px;
+padding-bottom: calc(var(–safe-bottom) + 10px);
+flex-shrink: 0;
+}
+
+.route-preview {
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 0;
+margin-bottom: 20px;
+overflow: hidden;
+}
+
+.route-dot {
+width: 8px;
+height: 8px;
+background: rgba(255,255,255,0.5);
+border-radius: 50%;
+flex-shrink: 0;
+}
+
+.route-dot.start-dot {
+background: white;
+width: 10px;
+height: 10px;
+}
+
+.route-dot.end-dot {
+background: var(–sun);
+width: 10px;
+height: 10px;
+}
+
+.route-line {
+flex: 1;
+height: 2px;
+background: rgba(255,255,255,0.3);
+max-width: 30px;
+}
+
+.route-label {
+font-size: 9px;
+color: rgba(255,255,255,0.6);
+text-align: center;
+margin-top: 4px;
+}
+
+.route-preview-wrap {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 2px;
+}
+
+.btn-start {
+width: 100%;
+padding: 20px;
+background: white;
+color: var(–odakyu-blue);
+border: none;
+border-radius: 20px;
+font-size: 22px;
+font-weight: 900;
+cursor: pointer;
+box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+letter-spacing: 2px;
+transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.btn-start:active {
+transform: scale(0.97);
+box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+/* ========================================
+SCREEN 2: MODE SELECT
+======================================== */
+#screen-mode {
+background: linear-gradient(180deg, #f0f4f8 0%, #e8f0ff 100%);
+padding: 0 24px;
+padding-top: calc(var(–safe-top) + 30px);
+padding-bottom: calc(var(–safe-bottom) + 20px);
+gap: 20px;
+}
+
+.mode-header {
+text-align: center;
+}
+
+.mode-header h2 {
+font-size: 24px;
+font-weight: 900;
+color: var(–odakyu-blue);
+}
+
+.mode-header p {
+font-size: 14px;
+color: var(–gray);
+margin-top: 6px;
+}
+
+.mode-cards {
+display: flex;
+flex-direction: column;
+gap: 16px;
+width: 100%;
+flex: 1;
+justify-content: center;
+}
+
+.mode-card {
+border: none;
+border-radius: 24px;
+padding: 28px 24px;
+cursor: pointer;
+text-align: left;
+transition: transform 0.15s, box-shadow 0.15s;
+position: relative;
+overflow: hidden;
+}
+
+.mode-card:active {
+transform: scale(0.97);
+}
+
+.mode-card.kaisoku {
+background: linear-gradient(135deg, var(–odakyu-blue) 0%, #0057b8 100%);
+box-shadow: 0 12px 40px rgba(0,48,135,0.35);
+}
+
+.mode-card.romance {
+background: linear-gradient(135deg, #4a0080 0%, #8b0000 100%);
+box-shadow: 0 12px 40px rgba(74,0,128,0.35);
+}
+
+.mode-card-badge {
+display: inline-block;
+background: rgba(255,255,255,0.2);
+color: rgba(255,255,255,0.9);
+font-size: 10px;
+font-weight: 700;
+padding: 4px 12px;
+border-radius: 100px;
+letter-spacing: 2px;
+margin-bottom: 12px;
+}
+
+.romance .mode-card-badge {
+background: rgba(201,162,39,0.3);
+color: var(–sun);
+}
+
+.mode-card-title {
+color: white;
+font-size: 28px;
+font-weight: 900;
+letter-spacing: -0.5px;
+margin-bottom: 6px;
+}
+
+.mode-card-desc {
+color: rgba(255,255,255,0.75);
+font-size: 13px;
+line-height: 1.5;
+}
+
+.mode-card-icon {
+position: absolute;
+right: 20px;
+top: 50%;
+transform: translateY(-50%);
+font-size: 52px;
+opacity: 0.25;
+}
+
+/* ========================================
+SCREEN 3: GAME
+======================================== */
+#screen-game {
+flex-direction: column;
+}
+
+/* Sky & Train Scene */
+.game-scene {
+width: 100%;
+height: 240px;
+position: relative;
+overflow: hidden;
+flex-shrink: 0;
+}
+
+.scene-sky {
+position: absolute;
+inset: 0;
+background: linear-gradient(180deg, #87ceeb 0%, #b8d9f8 70%, #d4eaff 100%);
+transition: background 1s ease;
+}
+
+.scene-sun {
+position: absolute;
+top: 20px;
+right: 30px;
+width: 50px;
+height: 50px;
+background: radial-gradient(circle, #ffd700, #ffa500);
+border-radius: 50%;
+box-shadow: 0 0 30px rgba(255,215,0,0.6);
+transition: all 1s ease;
+}
+
+.scene-cloud {
+position: absolute;
+background: white;
+border-radius: 50px;
+opacity: 0.85;
+}
+
+.scene-cloud::before, .scene-cloud::after {
+content: ‘’;
+position: absolute;
+background: white;
+border-radius: 50%;
+}
+
+.cloud1 {
+width: 80px; height: 28px;
+top: 30px; left: -100px;
+animation: cloudMove1 20s linear infinite;
+}
+.cloud1::before { width: 40px; height: 40px; top: -20px; left: 10px; }
+.cloud1::after { width: 30px; height: 30px; top: -15px; left: 35px; }
+
+.cloud2 {
+width: 60px; height: 22px;
+top: 55px; left: -60px;
+animation: cloudMove1 28s linear infinite 5s;
+opacity: 0.6;
+}
+.cloud2::before { width: 30px; height: 30px; top: -15px; left: 8px; }
+
+@keyframes cloudMove1 {
+from { transform: translateX(-50px); }
+to { transform: translateX(calc(430px + 100px)); }
+}
+
+.scene-buildings {
+position: absolute;
+bottom: 60px;
+left: 0;
+right: 0;
+height: 80px;
+display: flex;
+align-items: flex-end;
+gap: 3px;
+padding: 0 10px;
+opacity: 0;
+transition: opacity 0.8s ease;
+}
+
+.building {
+background: #dde5f0;
+border-radius: 3px 3px 0 0;
+flex-shrink: 0;
+}
+
+.scene-ground {
+position: absolute;
+bottom: 0;
+left: 0;
+right: 0;
+height: 60px;
+background: linear-gradient(180deg, #7ec850 0%, #5a9e3d 100%);
+transition: background 0.8s ease;
+}
+
+.scene-track-container {
+position: absolute;
+bottom: 18px;
+left: 0;
+right: 0;
+height: 24px;
+}
+
+.scene-track {
+position: absolute;
+top: 4px;
+left: 0;
+right: 0;
+height: 8px;
+background: #8a7a6a;
+border-radius: 4px;
+}
+
+.scene-track::before {
+content: ‘’;
+position: absolute;
+top: 50%;
+transform: translateY(-50%);
+left: 0;
+right: 0;
+height: 3px;
+background: repeating-linear-gradient(90deg,
+rgba(255,255,255,0.3) 0px, rgba(255,255,255,0.3) 15px,
+transparent 15px, transparent 25px);
+}
+
+.scene-train {
+position: absolute;
+bottom: 28px;
+left: 50%;
+transform: translateX(-50%);
+display: flex;
+gap: 2px;
+transition: left 1.5s cubic-bezier(0.4, 0, 0.2, 1),
+opacity 0.3s ease;
+z-index: 10;
+}
+
+/* ========================================
+TRAIN CARS
+======================================== */
+.train-car {
+position: relative;
+border-radius: 6px 6px 3px 3px;
+display: flex;
+flex-direction: column;
+overflow: hidden;
+}
+
+.train-car-body {
+position: relative;
+border-radius: 6px 6px 3px 3px;
+}
+
+.train-car-windows {
+position: absolute;
+top: 8px;
+left: 4px;
+right: 4px;
+display: flex;
+gap: 3px;
+}
+
+.window {
+flex: 1;
+height: 12px;
+background: rgba(135,206,235,0.8);
+border-radius: 2px;
+border: 1px solid rgba(255,255,255,0.4);
+}
+
+.train-car-stripe {
+position: absolute;
+bottom: 12px;
+left: 0;
+right: 0;
+height: 5px;
+}
+
+.train-car-wheel-row {
+display: flex;
+justify-content: space-around;
+padding: 0 4px;
+margin-top: 1px;
+}
+
+.wheel {
+width: 10px;
+height: 10px;
+background: #555;
+border-radius: 50%;
+border: 2px solid #888;
+}
+
+/* Kaisoku style */
+.kaisoku .train-car-body {
+background: linear-gradient(180deg, #f0f0f0 0%, #e0e0e0 100%);
+border: 1px solid #ccc;
+}
+
+.kaisoku .train-car-stripe {
+background: var(–odakyu-blue);
+}
+
+/* Romance style */
+.romance-car .train-car-body {
+background: linear-gradient(180deg, #c0392b 0%, #922b21 100%);
+border: 1px solid #7b241c;
+}
+
+.romance-car .train-car-stripe {
+background: var(–romance-gold);
+}
+
+.romance-car .window {
+background: rgba(255,200,100,0.4);
+}
+
+/* Head car */
+.head-car .train-car-body {
+border-radius: 12px 6px 3px 3px;
+}
+
+.train-nose {
+position: absolute;
+left: -12px;
+top: 5px;
+width: 14px;
+height: 28px;
+border-radius: 10px 0 0 5px;
+background: linear-gradient(180deg, #f0f0f0, #ddd);
+border: 1px solid #ccc;
+border-right: none;
+}
+
+.romance-car .train-nose {
+background: linear-gradient(180deg, #c0392b, #922b21);
+border-color: #7b241c;
+}
+
+/* ========================================
+STATION SIGN
+======================================== */
+.station-sign {
+position: absolute;
+top: 16px;
+left: 50%;
+transform: translateX(-50%);
+background: white;
+border: 3px solid var(–odakyu-blue);
+border-radius: 10px;
+padding: 6px 18px;
+text-align: center;
+box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+z-index: 20;
+white-space: nowrap;
+}
+
+.station-sign-label {
+font-size: 9px;
+color: var(–odakyu-blue);
+font-weight: 700;
+letter-spacing: 2px;
+}
+
+.station-sign-name {
+font-size: 18px;
+font-weight: 900;
+color: var(–odakyu-blue);
+letter-spacing: 1px;
+}
+
+/* ========================================
+PROGRESS BAR
+======================================== */
+.progress-area {
+width: 100%;
+padding: 12px 20px 8px;
+background: white;
+flex-shrink: 0;
+}
+
+.progress-stations {
+display: flex;
+align-items: center;
+justify-content: space-between;
+position: relative;
+padding: 0 4px;
+}
+
+.progress-track-line {
+position: absolute;
+top: 50%;
+left: 4px;
+right: 4px;
+height: 3px;
+background: #e0e0e0;
+transform: translateY(-50%);
+z-index: 0;
+}
+
+.progress-track-fill {
+position: absolute;
+top: 0;
+left: 0;
+height: 100%;
+background: var(–odakyu-blue);
+transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+border-radius: 2px;
+}
+
+.progress-station {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 4px;
+z-index: 1;
+position: relative;
+}
+
+.progress-dot {
+width: 12px;
+height: 12px;
+background: #e0e0e0;
+border: 2px solid white;
+border-radius: 50%;
+transition: all 0.5s ease;
+box-shadow: 0 0 0 0 transparent;
+}
+
+.progress-dot.done {
+background: var(–odakyu-blue);
+}
+
+.progress-dot.current {
+background: var(–odakyu-blue);
+width: 16px;
+height: 16px;
+box-shadow: 0 0 0 4px rgba(0,48,135,0.2);
+animation: pulseDot 1.5s ease-in-out infinite;
+}
+
+.progress-dot.stamp {
+background: var(–success);
+}
+
+@keyframes pulseDot {
+0%, 100% { box-shadow: 0 0 0 4px rgba(0,48,135,0.2); }
+50% { box-shadow: 0 0 0 8px rgba(0,48,135,0.1); }
+}
+
+.progress-name {
+font-size: 8px;
+color: var(–gray);
+font-weight: 600;
+text-align: center;
+line-height: 1.2;
+}
+
+.progress-name.current {
+color: var(–odakyu-blue);
+font-weight: 900;
+}
+
+.progress-stamp {
+font-size: 10px;
+margin-top: 1px;
+}
+
+/* ========================================
+GAME CONTENT AREA
+======================================== */
+.game-content {
+flex: 1;
+width: 100%;
+display: flex;
+flex-direction: column;
+padding: 0 20px;
+padding-bottom: calc(var(–safe-bottom) + 10px);
+gap: 16px;
+overflow: hidden;
+justify-content: center;
+}
+
+/* Announcement */
+.announcement {
+background: linear-gradient(135deg, var(–odakyu-blue) 0%, #0057b8 100%);
+border-radius: 16px;
+padding: 14px 18px;
+color: white;
+text-align: center;
+box-shadow: 0 6px 20px rgba(0,48,135,0.25);
+}
+
+.announcement-label {
+font-size: 10px;
+opacity: 0.75;
+letter-spacing: 2px;
+font-weight: 600;
+margin-bottom: 4px;
+}
+
+.announcement-text {
+font-size: 18px;
+font-weight: 800;
+letter-spacing: 0.5px;
+}
+
+/* Question */
+.question-card {
+background: white;
+border-radius: 20px;
+padding: 20px 18px;
+box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+border: 2px solid var(–odakyu-accent);
+}
+
+.question-label {
+font-size: 10px;
+color: var(–gray);
+font-weight: 700;
+letter-spacing: 2px;
+margin-bottom: 8px;
+}
+
+.question-text {
+font-size: 20px;
+font-weight: 900;
+color: var(–dark);
+line-height: 1.4;
+}
+
+/* Choices */
+.choices {
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+.choice-btn {
+width: 100%;
+padding: 16px 20px;
+background: white;
+border: 2.5px solid #e0e8f0;
+border-radius: 16px;
+font-size: 17px;
+font-weight: 800;
+color: var(–dark);
+cursor: pointer;
+text-align: left;
+transition: all 0.15s ease;
+display: flex;
+align-items: center;
+gap: 12px;
+box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+position: relative;
+overflow: hidden;
+}
+
+.choice-btn::before {
+content: ‘’;
+position: absolute;
+inset: 0;
+background: var(–odakyu-blue);
+transform: scaleX(0);
+transform-origin: left;
+transition: transform 0.3s ease;
+z-index: 0;
+}
+
+.choice-btn:active {
+transform: scale(0.98);
+}
+
+.choice-btn.correct {
+background: var(–success);
+border-color: var(–success);
+color: white;
+transform: scale(1.02);
+}
+
+.choice-btn.wrong {
+animation: shake 0.4s ease;
+border-color: var(–error);
+background: #fef2f2;
+}
+
+@keyframes shake {
+0%, 100% { transform: translateX(0); }
+20% { transform: translateX(-8px); }
+40% { transform: translateX(8px); }
+60% { transform: translateX(-5px); }
+80% { transform: translateX(5px); }
+}
+
+.choice-num {
+width: 28px;
+height: 28px;
+background: var(–odakyu-accent);
+border-radius: 8px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 13px;
+font-weight: 900;
+color: var(–odakyu-blue);
+flex-shrink: 0;
+position: relative;
+z-index: 1;
+}
+
+.choice-text {
+position: relative;
+z-index: 1;
+}
+
+/* ========================================
+OVERLAY EFFECTS
+======================================== */
+#overlay {
+position: fixed;
+inset: 0;
+z-index: 100;
+display: none;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+pointer-events: none;
+}
+
+#overlay.active {
+display: flex;
+pointer-events: auto;
+}
+
+/* Departure overlay */
+.departure-overlay {
+position: absolute;
+inset: 0;
+background: linear-gradient(180deg, rgba(0,48,135,0.95) 0%, rgba(0,87,184,0.95) 100%);
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+gap: 12px;
+animation: overlayIn 0.3s ease;
+}
+
+@keyframes overlayIn {
+from { opacity: 0; }
+to { opacity: 1; }
+}
+
+.departure-text {
+color: white;
+font-size: 56px;
+font-weight: 900;
+letter-spacing: 4px;
+text-shadow: 0 4px 20px rgba(0,0,0,0.4);
+animation: departureBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes departureBounce {
+from { transform: scale(0.3); opacity: 0; }
+to { transform: scale(1); opacity: 1; }
+}
+
+.departure-sub {
+color: rgba(255,255,255,0.8);
+font-size: 16px;
+font-weight: 600;
+letter-spacing: 3px;
+}
+
+/* Arrival overlay */
+.arrival-overlay {
+position: absolute;
+inset: 0;
+background: linear-gradient(180deg, #001a5c 0%, #003087 100%);
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+gap: 12px;
+}
+
+.arrival-stamp-icon {
+font-size: 72px;
+animation: stampDrop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+animation-delay: 0.2s;
+opacity: 0;
+}
+
+@keyframes stampDrop {
+from { transform: scale(0) rotate(-20deg); opacity: 0; }
+to { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.arrival-label {
+color: rgba(255,255,255,0.7);
+font-size: 12px;
+letter-spacing: 3px;
+font-weight: 700;
+margin-top: 8px;
+}
+
+.arrival-name {
+color: white;
+font-size: 40px;
+font-weight: 900;
+letter-spacing: 2px;
+text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+animation: arrivalSlide 0.5s ease 0.4s both;
+}
+
+@keyframes arrivalSlide {
+from { transform: translateY(30px); opacity: 0; }
+to { transform: translateY(0); opacity: 1; }
+}
+
+.arrival-sub {
+color: rgba(255,255,255,0.7);
+font-size: 14px;
+font-weight: 600;
+letter-spacing: 1px;
+animation: arrivalSlide 0.5s ease 0.6s both;
+}
+
+.arrival-btn {
+margin-top: 20px;
+padding: 16px 40px;
+background: white;
+color: var(–odakyu-blue);
+border: none;
+border-radius: 100px;
+font-size: 18px;
+font-weight: 900;
+cursor: pointer;
+letter-spacing: 1px;
+box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+animation: arrivalSlide 0.5s ease 0.8s both;
+transition: transform 0.1s;
+}
+
+.arrival-btn:active {
+transform: scale(0.96);
+}
+
+/* ========================================
+SPARKLES
+======================================== */
+.sparkle-container {
+position: fixed;
+inset: 0;
+pointer-events: none;
+z-index: 200;
+overflow: hidden;
+}
+
+.sparkle {
+position: absolute;
+pointer-events: none;
+animation: sparkleFly 1.2s ease-out forwards;
+}
+
+@keyframes sparkleFly {
+0% { transform: scale(0) rotate(0deg); opacity: 1; }
+50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+100% { transform: scale(0) rotate(360deg) translateY(-100px); opacity: 0; }
+}
+
+/* ========================================
+GOAL SCREEN
+======================================== */
+#screen-goal {
+background: linear-gradient(180deg, #001a5c 0%, #003087 60%, #0057b8 100%);
+padding: calc(var(–safe-top) + 20px) 24px calc(var(–safe-bottom) + 20px);
+gap: 0;
+justify-content: space-between;
+align-items: center;
+}
+
+.goal-fireworks {
+position: absolute;
+inset: 0;
+pointer-events: none;
+overflow: hidden;
+}
+
+.firework {
+position: absolute;
+border-radius: 50%;
+animation: fireworkBurst 1.5s ease-out infinite;
+}
+
+@keyframes fireworkBurst {
+0% { transform: scale(0); opacity: 1; }
+100% { transform: scale(4); opacity: 0; }
+}
+
+.goal-top {
+text-align: center;
+z-index: 1;
+}
+
+.goal-emoji {
+font-size: 64px;
+display: block;
+animation: goalBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+}
+
+@keyframes goalBounce {
+from { transform: scale(0) rotate(-20deg); }
+to { transform: scale(1) rotate(0deg); }
+}
+
+.goal-title {
+font-size: 40px;
+font-weight: 900;
+color: white;
+letter-spacing: 2px;
+margin-top: 16px;
+animation: goalFade 0.6s ease 0.6s both;
+text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.goal-subtitle {
+font-size: 16px;
+color: rgba(255,255,255,0.75);
+margin-top: 8px;
+animation: goalFade 0.6s ease 0.8s both;
+font-weight: 600;
+}
+
+@keyframes goalFade {
+from { opacity: 0; transform: translateY(20px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+.goal-stamps {
+display: flex;
+gap: 16px;
+justify-content: center;
+z-index: 1;
+animation: goalFade 0.6s ease 1s both;
+}
+
+.goal-stamp-item {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 4px;
+}
+
+.goal-stamp-icon {
+width: 52px;
+height: 52px;
+background: rgba(255,255,255,0.1);
+border: 2px solid rgba(255,255,255,0.3);
+border-radius: 14px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 24px;
+}
+
+.goal-stamp-name {
+font-size: 9px;
+color: rgba(255,255,255,0.6);
+font-weight: 600;
+text-align: center;
+}
+
+.goal-bottom {
+width: 100%;
+z-index: 1;
+animation: goalFade 0.6s ease 1.2s both;
+}
+
+.btn-restart {
+width: 100%;
+padding: 20px;
+background: white;
+color: var(–odakyu-blue);
+border: none;
+border-radius: 20px;
+font-size: 20px;
+font-weight: 900;
+cursor: pointer;
+letter-spacing: 2px;
+box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+transition: transform 0.1s;
+margin-bottom: 12px;
+}
+
+.btn-restart:active {
+transform: scale(0.97);
+}
+
+/* ========================================
+ROMANCE MODE SPECIAL
+======================================== */
+.mode-romance #screen-game .game-scene .scene-sky {
+background: linear-gradient(180deg, #1a0030 0%, #4a0080 70%, #8b0040 100%) !important;
+}
+
+.romance-mode .scene-sun {
+background: radial-gradient(circle, #fff, #ffd700);
+box-shadow: 0 0 60px rgba(255,215,0,0.8), 0 0 120px rgba(255,165,0,0.4);
+top: 30px !important;
+}
+
+.romance-stars {
+position: absolute;
+inset: 0;
+pointer-events: none;
+}
+
+/* ========================================
+SOUND WAVE (visual only)
+======================================== */
+.sound-wave {
+display: flex;
+gap: 2px;
+align-items: center;
+height: 24px;
+opacity: 0;
+transition: opacity 0.3s;
+}
+
+.sound-wave.active {
+opacity: 1;
+}
+
+.wave-bar {
+width: 3px;
+background: rgba(255,255,255,0.7);
+border-radius: 2px;
+animation: waveAnim 0.8s ease infinite;
+}
+
+.wave-bar:nth-child(1) { height: 8px; animation-delay: 0s; }
+.wave-bar:nth-child(2) { height: 16px; animation-delay: 0.1s; }
+.wave-bar:nth-child(3) { height: 24px; animation-delay: 0.2s; }
+.wave-bar:nth-child(4) { height: 16px; animation-delay: 0.3s; }
+.wave-bar:nth-child(5) { height: 8px; animation-delay: 0.4s; }
+
+@keyframes waveAnim {
+0%, 100% { transform: scaleY(0.4); }
+50% { transform: scaleY(1); }
+}
+
+/* Romance mode specific overlay */
+.romance-overlay {
+position: absolute;
+inset: 0;
+background: linear-gradient(180deg, rgba(74,0,128,0.95) 0%, rgba(139,0,0,0.95) 100%);
+}
+
+/* ========================================
+MISC UTILITIES
+======================================== */
+.hidden { display: none !important; }
+
+.feedback-wrong {
+position: fixed;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+background: var(–error);
+color: white;
+font-size: 28px;
+font-weight: 900;
+padding: 16px 32px;
+border-radius: 20px;
+z-index: 300;
+animation: wrongPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+pointer-events: none;
+box-shadow: 0 10px 40px rgba(239,68,68,0.5);
+}
+
+@keyframes wrongPop {
+from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* Romance departure */
+.departure-overlay.romance {
+background: linear-gradient(180deg, rgba(74,0,128,0.97) 0%, rgba(139,0,0,0.97) 100%);
+}
+
+.departure-overlay.romance .departure-text {
+color: var(–sun);
+text-shadow: 0 0 30px rgba(255,215,0,0.8), 0 4px 20px rgba(0,0,0,0.4);
+}
+</style>
+
 </head>
 <body>
-  <div class="app">
-    <section id="startScreen" class="screen-center">
-      <div class="topbar">
-        <div>
-          <div class="title">おだきゅう たんけん！</div>
-          <div class="tiny">まちだから しんじゅくへ。えらんで、すすんで、スタンプをあつめよう！</div>
-        </div>
-        <div class="pill" id="bestBadge">⭐ さいこう 0こ</div>
-      </div>
-      <div class="card">
-        <h2 style="font-size:28px; margin-bottom:12px;">れっしゃを えらぼう</h2>
-        <div class="modes">
-          <button class="modebtn" data-mode="rapid"><strong>🚆 かいそくきゅうこう</strong><span>ほんものっぽい ていしゃえきで しんじゅくへ！</span></button>
-          <button class="modebtn" data-mode="romance"><strong>🚄 ろまんすかー</strong><span>きらきら ちゃいむつき。 とくべつな たび！</span></button>
-          <button class="modebtn" data-mode="count"><strong>🔢 すうじ チャレンジ</strong><span>えきの かずを かぞえて たびを すすめよう！</span></button>
-        </div>
-        <div id="romanceLock" class="unlock hidden">🔓 しんじゅくに 1かい つくと、ろまんすかーが もっと たのしくなるよ！</div>
-      </div>
-      <div class="card">
-        <h3 style="font-size:22px; margin-bottom:8px;">きょうの ルート</h3>
-        <div class="route" id="previewRoute"></div>
-      </div>
-      <div class="parent-note">※ とくちょう：えんしゅつ つよめ / しゅっぱつアニメ / きらきら ろまんすかー ちゃいむ</div>
-    </section>
+<div id="app">
 
-    <section id="gameScreen" class="hidden">
-      <div class="topbar">
-        <div>
-          <div class="title" id="appTitle">おだきゅう たんけん！</div>
-          <div class="tiny" id="modeCaption"></div>
-        </div>
-        <div class="pill" id="stampCount">⭐ 0 / 6</div>
-      </div>
+  <!-- ====== SCREEN: START ====== -->
 
-      <div class="card">
-        <div class="route" id="routeTrack"></div>
-      </div>
+  <div id="screen-start" class="screen active">
+    <div class="start-sky" id="startSky">
+      <!-- Stars added by JS -->
+    </div>
 
-      <div class="hero">
-        <div class="card station-box" id="stationCard">
-          <div class="station-badge" id="stationBadge">いまの えき</div>
-          <div class="station-name" id="stationName"></div>
-          <div class="station-desc" id="stationDesc"></div>
-          <div class="announcement" id="announcementText"></div>
-          <div class="landmark" id="landmark"></div>
-          <div class="sparkles" id="sparkles"></div>
-          <div class="depart-badge" id="departBadge">しゅっぱつ！</div>
-          <div class="arrival-ribbon" id="arrivalRibbon">とうちゃく！</div>
-        </div>
-        <div class="card train-panel">
-          <div>
-            <div class="tiny" style="font-weight:800; margin-bottom:6px;">たびの しんちょく</div>
-            <div class="train-track">
-              <div class="rail"></div>
-              <div class="goal-flag">🏁</div>
-              <div class="train" id="trainEmoji">🚆</div>
-            </div>
-            <div class="meter" style="margin-top:10px;"><div id="meterFill"></div></div>
-          </div>
-          <div>
-            <div class="tiny" style="font-weight:800; margin-bottom:6px;">スタンプ</div>
-            <div class="stamps" id="stamps"></div>
-          </div>
-        </div>
-      </div>
+```
+<div class="start-title-area">
+  <div class="start-logo">ODAKYU LINE</div>
+  <h1 class="start-title">
+    おだきゅう<br>でんしゃのたび
+    <span>まちだ → しんじゅく</span>
+  </h1>
+</div>
 
-      <div class="card quiz">
-        <div class="quiz-head">
-          <div class="question-type" id="questionType">つぎの えき</div>
-          <button id="speakBtn" class="subbtn" style="padding:10px 14px;border-radius:999px;border:none;font-weight:900;">🔊 よみあげ</button>
-        </div>
-        <div class="question-text" id="questionText"></div>
-        <div class="choices" id="choices"></div>
-        <div class="feedback" id="feedback"></div>
-        <div class="bottom">
-          <button class="bigbtn hidden" id="nextBtn">つぎへ すすむ</button>
-          <button class="bigbtn subbtn hidden" id="retryBtn">もういちど</button>
-        </div>
-      </div>
-    </section>
+<div class="start-train-scene">
+  <div class="start-track"></div>
+  <div class="start-train" id="startTrain">
+    <!-- Train rendered by JS -->
+  </div>
+</div>
 
-    <section id="goalScreen" class="screen-center hidden">
-      <div class="card goal-screen">
-        <div class="goal-emoji" id="goalEmoji">🎉</div>
-        <div class="goal-title" id="goalTitle">しんじゅく とうちゃく！</div>
-        <p class="mini" id="goalText"></p>
-        <div class="stamps" id="goalStamps" style="justify-content:center; margin:16px 0;"></div>
-        <div id="unlockMessage" class="unlock hidden"></div>
-        <div class="bottom">
-          <button class="bigbtn" id="againBtn">もう 1かい あそぶ</button>
-          <button class="bigbtn subbtn" id="homeBtn">タイトルへ</button>
-        </div>
-      </div>
-    </section>
+<div class="start-bottom">
+  <div style="display:flex; justify-content:center; gap:6px; margin-bottom:20px;">
+    <div class="route-preview-wrap">
+      <div class="route-dot start-dot"></div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.6);margin-top:3px;">まちだ</div>
+    </div>
+    <div style="display:flex;align-items:center;margin-bottom:14px;">
+      <div class="route-line"></div><div class="route-dot"></div>
+      <div class="route-line"></div><div class="route-dot"></div>
+      <div class="route-line"></div><div class="route-dot"></div>
+      <div class="route-line"></div><div class="route-dot"></div>
+      <div class="route-line"></div>
+    </div>
+    <div class="route-preview-wrap">
+      <div class="route-dot end-dot"></div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.6);margin-top:3px;">しんじゅく</div>
+    </div>
+  </div>
+  <button class="btn-start" onclick="showModeSelect()">🚃 でかけよう！</button>
+</div>
+```
+
   </div>
 
-  <script>
-    const STATIONS = [
-      {
-        key:'machida', name:'まちだ', icon:'🏬', color1:'#eaf4ff', color2:'#fff6e7',
-        desc:'ここから しゅっぱつ！ かいそくきゅうこうで しんじゅくへ。',
-        announcement:'まもなく まちだです。 ドアが しまりまーす。 しゅっぱつ しんこう！'
-      },
-      {
-        key:'shin-yuri', name:'しんゆりがおか', icon:'🌳', color1:'#eefcf3', color2:'#f1fbff',
-        desc:'たません のりかえの えき。 つぎは かわを わたるよ。',
-        announcement:'まもなく しんゆりがおかです。 たませんは おのりかえです。'
-      },
-      {
-        key:'noborito', name:'のぼりと', icon:'🌉', color1:'#eefaff', color2:'#f9fff1',
-        desc:'かわの ちかくを すすむよ。 つぎは にぎやかな まちへ。',
-        announcement:'まもなく のぼりとです。 みぎがわに かわが みえてくるよ。'
-      },
-      {
-        key:'shimokita', name:'しもきたざわ', icon:'🎸', color1:'#fff2fb', color2:'#fff9ef',
-        desc:'おしゃれな えき！ もう だいぶ ゴールに ちかい。',
-        announcement:'まもなく しもきたざわです。 にぎやかな まちへ とうちゃく！'
-      },
-      {
-        key:'yoyogi-uehara', name:'よよぎうえはら', icon:'🚇', color1:'#f2f6ff', color2:'#f5fff6',
-        desc:'もうすぐ しんじゅく！ さいごの 1えきだよ。',
-        announcement:'まもなく よよぎうえはらです。 つぎは いよいよ しんじゅく！'
-      },
-      {
-        key:'shinjuku', name:'しんじゅく', icon:'🏙️', color1:'#fff4e8', color2:'#f0f7ff',
-        desc:'ゴール！ たんけん せいこう！',
-        announcement:'まもなく しんじゅく、 しんじゅくです。 ごーるに とうちゃく！'
-      }
+  <!-- ====== SCREEN: MODE SELECT ====== -->
+
+  <div id="screen-mode" class="screen">
+    <div class="mode-header">
+      <h2>でんしゃを えらんでね</h2>
+      <p>どっちに のる？</p>
+    </div>
+
+```
+<div class="mode-cards">
+  <button class="mode-card kaisoku" onclick="startGame('kaisoku')">
+    <div class="mode-card-badge">KAISOKU</div>
+    <div class="mode-card-title">かいそく</div>
+    <div class="mode-card-desc">ふつうの でんしゃ<br>みんなで のれるよ</div>
+    <div class="mode-card-icon">🚃</div>
+  </button>
+
+  <button class="mode-card romance" onclick="startGame('romance')">
+    <div class="mode-card-badge" style="background:rgba(201,162,39,0.3);color:#ffd700;">ROMANCECAR</div>
+    <div class="mode-card-title">ロマンスカー</div>
+    <div class="mode-card-desc">とくべつな でんしゃ<br>キラキラ だよ✨</div>
+    <div class="mode-card-icon">🌟</div>
+  </button>
+</div>
+```
+
+  </div>
+
+  <!-- ====== SCREEN: GAME ====== -->
+
+  <div id="screen-game" class="screen">
+    <!-- Scene -->
+    <div class="game-scene" id="gameScene">
+      <div class="scene-sky" id="sceneSky"></div>
+      <div class="scene-sun" id="sceneSun"></div>
+      <div class="scene-cloud cloud1"></div>
+      <div class="scene-cloud cloud2"></div>
+      <div class="scene-buildings" id="sceneBuildings"></div>
+      <div class="scene-ground" id="sceneGround"></div>
+      <div class="scene-track-container">
+        <div class="scene-track"></div>
+      </div>
+      <div class="scene-train" id="gameTrain"></div>
+      <div class="station-sign" id="stationSign">
+        <div class="station-sign-label">CURRENT STATION</div>
+        <div class="station-sign-name" id="stationSignName">まちだ</div>
+      </div>
+    </div>
+
+```
+<!-- Progress -->
+<div class="progress-area">
+  <div class="progress-stations" id="progressStations">
+    <div class="progress-track-line">
+      <div class="progress-track-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Content -->
+<div class="game-content">
+  <div class="announcement" id="announcement">
+    <div class="announcement-label">アナウンス</div>
+    <div class="announcement-text" id="announcementText">まもなく しんゆりがおか</div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-label">🚉 もんだい</div>
+    <div class="question-text" id="questionText">まちだの つぎは どこ？</div>
+  </div>
+
+  <div class="choices" id="choicesContainer">
+    <!-- Choices added by JS -->
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- ====== SCREEN: GOAL ====== -->
+
+  <div id="screen-goal" class="screen">
+    <div class="goal-fireworks" id="goalFireworks"></div>
+
+```
+<div class="goal-top">
+  <span class="goal-emoji" id="goalEmoji">🎉</span>
+  <div class="goal-title">ゴール！</div>
+  <div class="goal-subtitle" id="goalSubtitle">しんじゅく に とうちゃく！</div>
+</div>
+
+<div class="goal-stamps" id="goalStamps"></div>
+
+<div class="goal-bottom">
+  <button class="btn-restart" onclick="restartGame()">🔄 もういちど！</button>
+</div>
+```
+
+  </div>
+
+  <!-- ====== OVERLAY ====== -->
+
+  <div id="overlay"></div>
+
+  <!-- ====== SPARKLES ====== -->
+
+  <div class="sparkle-container" id="sparkleContainer"></div>
+</div>
+
+<script>
+// ========================================
+// GAME DATA
+// ========================================
+const STATIONS = [
+  {
+    id: 'machida',
+    name: 'まちだ',
+    nameEn: 'MACHIDA',
+    emoji: '🏙️',
+    color: '#003087',
+    sky: 'linear-gradient(180deg, #87ceeb 0%, #b8d9f8 70%, #d4eaff 100%)',
+    ground: 'linear-gradient(180deg, #7ec850 0%, #5a9e3d 100%)',
+    hasBuildings: false,
+  },
+  {
+    id: 'shinyuri',
+    name: 'しんゆりがおか',
+    nameEn: 'SHIN-YURIGAOKA',
+    emoji: '🌸',
+    color: '#0057b8',
+    sky: 'linear-gradient(180deg, #98d8f0 0%, #c5e8f8 70%, #e0f0ff 100%)',
+    ground: 'linear-gradient(180deg, #6ab84a 0%, #4a9e30 100%)',
+    hasBuildings: true,
+  },
+  {
+    id: 'noborito',
+    name: 'のぼりと',
+    nameEn: 'NOBORITO',
+    emoji: '🌊',
+    color: '#005599',
+    sky: 'linear-gradient(180deg, #b8d9f8 0%, #d4eaff 70%, #eaf4ff 100%)',
+    ground: 'linear-gradient(180deg, #5da842 0%, #3d8e28 100%)',
+    hasBuildings: true,
+  },
+  {
+    id: 'shimokitazawa',
+    name: 'しもきたざわ',
+    nameEn: 'SHIMOKITAZAWA',
+    emoji: '🎵',
+    color: '#004488',
+    sky: 'linear-gradient(180deg, #c5d8f0 0%, #d8e8f8 70%, #eaf2ff 100%)',
+    ground: 'linear-gradient(180deg, #a0a0b0 0%, #808090 100%)',
+    hasBuildings: true,
+  },
+  {
+    id: 'yoyogiuehara',
+    name: 'よよぎうえはら',
+    nameEn: 'YOYOGI-UEHARA',
+    emoji: '🌆',
+    color: '#003377',
+    sky: 'linear-gradient(180deg, #e8d5c0 0%, #f0e0c8 70%, #fff0e0 100%)',
+    ground: 'linear-gradient(180deg, #888898 0%, #686878 100%)',
+    hasBuildings: true,
+  },
+  {
+    id: 'shinjuku',
+    name: 'しんじゅく',
+    nameEn: 'SHINJUKU',
+    emoji: '🌟',
+    color: '#001a5c',
+    sky: 'linear-gradient(180deg, #1a1a3a 0%, #2a2a5a 70%, #3a3a7a 100%)',
+    ground: 'linear-gradient(180deg, #606070 0%, #404050 100%)',
+    hasBuildings: true,
+  },
+];
+
+const QUESTIONS = [
+  {
+    fromIdx: 0,
+    text: 'まちだの つぎは どこ？',
+    correct: 1,
+    choices: ['しんゆりがおか', 'たまがわがくえんまえ', 'さがみおおの'],
+    announcement: 'まもなく しんゆりがおか',
+  },
+  {
+    fromIdx: 1,
+    text: 'しんゆりがおかの つぎは どこ？',
+    correct: 0,
+    choices: ['のぼりと', 'よみうりランドまえ', 'むこうがおか ゆえん'],
+    announcement: 'まもなく のぼりと',
+  },
+  {
+    fromIdx: 2,
+    text: 'のぼりとの つぎは どこ？',
+    correct: 2,
+    choices: ['きたみ', 'せいじょうがくえんまえ', 'しもきたざわ'],
+    announcement: 'まもなく しもきたざわ',
+  },
+  {
+    fromIdx: 3,
+    text: 'しもきたざわの つぎは どこ？',
+    correct: 1,
+    choices: ['だいたばし', 'よよぎうえはら', 'さんぐうばし'],
+    announcement: 'まもなく よよぎうえはら',
+  },
+  {
+    fromIdx: 4,
+    text: 'よよぎうえはらの つぎは どこ？',
+    correct: 0,
+    choices: ['しんじゅく', 'しんじゅく にしぐち', 'はらじゅく'],
+    announcement: 'まもなく しんじゅく',
+  },
+];
+
+// ========================================
+// GAME STATE
+// ========================================
+let state = {
+  mode: 'kaisoku',
+  currentQuestion: 0,
+  stamps: [],
+  answered: false,
+};
+
+// ========================================
+// AUDIO
+// ========================================
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new AudioCtx();
+  return audioCtx;
+}
+
+function playPinpon() {
+  try {
+    const ctx = getAudioCtx();
+    const freqs = [880, 1100, 1320, 1760];
+    freqs.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      const t = ctx.currentTime + i * 0.12;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.3, t + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+      osc.start(t);
+      osc.stop(t + 0.3);
+    });
+  } catch(e) {}
+}
+
+function playWrong() {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(300, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.3);
+    osc.type = 'sawtooth';
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.3);
+  } catch(e) {}
+}
+
+function playDeparture() {
+  try {
+    const ctx = getAudioCtx();
+    // Bell-like chime
+    const freqs = [523, 659, 784, 1047, 784, 659, 523];
+    freqs.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      const t = ctx.currentTime + i * 0.15;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.25, t + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+      osc.start(t);
+      osc.stop(t + 0.5);
+    });
+  } catch(e) {}
+}
+
+function playRomanceChime() {
+  try {
+    const ctx = getAudioCtx();
+    // Richer chime for romance car
+    const notes = [
+      {freq: 523, t: 0},
+      {freq: 659, t: 0.18},
+      {freq: 784, t: 0.36},
+      {freq: 1047, t: 0.54},
+      {freq: 1319, t: 0.72},
+      {freq: 1047, t: 0.9},
+      {freq: 784, t: 1.08},
+      {freq: 523, t: 1.26},
     ];
-
-    const ROUTE_CHOICES = {
-      machida: ['しんゆりがおか','たまがわがくえんまえ','さがみおおの'],
-      'shin-yuri': ['のぼりと','よみうりらんどまえ','むこうがおかゆうえん'],
-      noborito: ['しもきたざわ','いくた','せいじょうがくえんまえ'],
-      shimokita: ['よよぎうえはら','ひがしきたざわ','しんじゅく'],
-      'yoyogi-uehara': ['しんじゅく','ひがしきたざわ','よよぎはちまん']
-    };
-
-    const state = {
-      mode: 'rapid',
-      index: 0,
-      stamps: [],
-      question: null,
-      wrongCount: 0,
-      unlockedRomance: false,
-      best: 0
-    };
-
-    const el = id => document.getElementById(id);
-    const previewRoute = el('previewRoute');
-    const routeTrack = el('routeTrack');
-    const stampsEl = el('stamps');
-    const goalStamps = el('goalStamps');
-    const startScreen = el('startScreen');
-    const gameScreen = el('gameScreen');
-    const goalScreen = el('goalScreen');
-
-    function loadProgress() {
-      const saved = JSON.parse(localStorage.getItem('odakyu-v7-progress') || '{}');
-      state.unlockedRomance = !!saved.unlockedRomance;
-      state.best = saved.best || 0;
-      el('bestBadge').textContent = `⭐ さいこう ${state.best}こ`;
-      if (state.unlockedRomance) el('romanceLock').classList.remove('hidden');
-    }
-
-    function saveProgress() {
-      localStorage.setItem('odakyu-v7-progress', JSON.stringify({ unlockedRomance: state.unlockedRomance, best: state.best }));
-    }
-
-    function shuffle(list) {
-      const a = [...list];
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    }
-
-    function stationAt(i){ return STATIONS[i]; }
-
-    function renderRoute(target) {
-      target.innerHTML = '';
-      STATIONS.forEach((st, i) => {
-        const stop = document.createElement('div');
-        stop.className = 'stop' + (i < state.index ? ' done' : '') + (i === state.index ? ' current' : '');
-        stop.innerHTML = `<span class="land">${st.icon}</span><div class="jp">${st.name}</div>${i===state.index?'<div class="tiny">いまここ</div>':''}`;
-        target.appendChild(stop);
-        if (i < STATIONS.length - 1) {
-          const c = document.createElement('div');
-          c.className='connector';
-          c.textContent='➜';
-          target.appendChild(c);
-        }
-      });
-    }
-
-    function renderStamps(target, total = STATIONS.length) {
-      target.innerHTML = '';
-      for (let i = 0; i < total; i++) {
-        const s = document.createElement('div');
-        s.className = 'stamp' + (state.stamps.includes(i) ? ' on' : '');
-        s.textContent = state.stamps.includes(i) ? STATIONS[i].icon : '☆';
-        target.appendChild(s);
-      }
-    }
-
-    function currentQuestion() {
-      const st = stationAt(state.index);
-      if (state.index >= STATIONS.length - 1) return null;
-      const next = stationAt(state.index + 1);
-      const remainStops = STATIONS.length - 1 - state.index;
-
-      const bank = [
-        {
-          type: 'つぎの えき',
-          text: `${st.name}の つぎは どこ？`,
-          correct: next.name,
-          choices: shuffle(ROUTE_CHOICES[st.key])
-        },
-        {
-          type: 'なんばんめ？',
-          text: `${st.name}から 1ばん つぎに とまる えきは？`,
-          correct: next.name,
-          choices: shuffle([
-            next.name,
-            stationAt(Math.max(0,state.index-1)).name,
-            stationAt(Math.min(STATIONS.length-1,state.index+2)).name
-          ].filter((v, idx, arr)=>arr.indexOf(v)===idx))
-        },
-        {
-          type: 'あと いくつ？',
-          text: `しんじゅくまで あと いくつ とまる？`,
-          correct: String(remainStops),
-          choices: shuffle([String(remainStops), String(Math.max(1, remainStops-1)), String(remainStops+1)])
-        }
-      ];
-
-      if (state.mode === 'count') {
-        bank.push({
-          type: 'すうじ チャレンジ',
-          text: `${st.name}から ${next.name}へ すすむと えきは いくつ ふえる？`,
-          correct: '1',
-          choices: shuffle(['1','2','3'])
-        });
-      }
-
-      if (state.mode === 'romance') {
-        bank.push({
-          type: 'ろまんすかー',
-          text: `とくべつな れっしゃで ${next.name}へ いこう！ どれを おす？`,
-          correct: next.name,
-          choices: shuffle([next.name, 'まちがいじゃないけど いまは ちがう', 'あとで とまる えき'])
-        });
-      }
-
-      return bank[(state.index + (state.mode==='count'?1:0) + (state.mode==='romance'?2:0)) % bank.length];
-    }
-
-    function speak(text) {
-      if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = 'ja-JP';
-      u.rate = 0.93;
-      u.pitch = state.mode === 'romance' ? 1.05 : 1.0;
-      window.speechSynthesis.speak(u);
-    }
-
-    function toneSequence(notes, master=0.12) {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      let t = ctx.currentTime;
-      notes.forEach(([freq, dur, type='sine', gap=0.02, gain=master]) => {
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = type;
-        o.frequency.value = freq;
-        g.gain.setValueAtTime(0.0001, t);
-        g.gain.exponentialRampToValueAtTime(gain, t + 0.01);
-        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-        o.connect(g); g.connect(ctx.destination);
-        o.start(t); o.stop(t + dur);
-        t += dur + gap;
-      });
-    }
-
-    function beep(freq=880, duration=0.12, type='sine', gap=0.03, count=2, gainMax=0.14) {
-      const notes = [];
-      for (let i=0;i<count;i++) notes.push([freq * (1 + i*0.08), duration, type, gap, gainMax]);
-      toneSequence(notes, gainMax);
-    }
-
-    function correctFanfare() {
-      toneSequence([
-        [784, 0.08, 'triangle', 0.01, 0.10],
-        [1046, 0.09, 'triangle', 0.01, 0.12],
-        [1319, 0.12, 'triangle', 0.03, 0.14],
-        [1568, 0.18, 'sine', 0.01, 0.15]
-      ], 0.14);
-    }
-
-    function wrongBuzz() {
-      toneSequence([
-        [320,0.07,'square',0.02,0.06],
-        [260,0.08,'square',0.01,0.05]
-      ], 0.06);
-    }
-
-    function romanceChime() {
-      toneSequence([
-        [1046, 0.12, 'triangle', 0.02, 0.10],
-        [1319, 0.12, 'sine', 0.02, 0.11],
-        [1568, 0.14, 'triangle', 0.02, 0.12],
-        [2093, 0.16, 'sine', 0.02, 0.12],
-        [1760, 0.12, 'triangle', 0.02, 0.11],
-        [2093, 0.18, 'sine', 0.03, 0.13],
-        [2637, 0.26, 'triangle', 0.02, 0.14]
-      ], 0.13);
-      setTimeout(() => sparkleBurst(18), 40);
-    }
-
-    function sparkleBurst(count=10) {
-      const host = el('sparkles');
-      host.innerHTML = '';
-      const symbols = ['✨','⭐','💫','✴️'];
-      for (let i=0; i<count; i++) {
-        const s = document.createElement('span');
-        s.textContent = symbols[i % symbols.length];
-        s.style.left = (8 + Math.random()*84) + '%';
-        s.style.top = (40 + Math.random()*40) + '%';
-        s.style.animationDelay = (Math.random()*0.24) + 's';
-        host.appendChild(s);
-      }
-      setTimeout(() => { host.innerHTML = ''; }, 1800);
-    }
-
-
-    function flashBadge(id, text) {
-      const node = el(id);
-      node.textContent = text;
-      node.classList.remove('show-badge');
-      void node.offsetWidth;
-      node.classList.add('show-badge');
-    }
-
-    function animateTrainAdvance() {
-      const nextPercent = ((state.index + 1) / (STATIONS.length - 1)) * 100;
-      const train = el('trainEmoji');
-      train.classList.remove('pop','boost');
-      void train.offsetWidth;
-      train.style.left = `calc(${nextPercent}% - 8px)`;
-      train.classList.add('boost');
-      setTimeout(() => train.classList.remove('boost'), 950);
-    }
-
-    function celebrateCorrect(nextName) {
-      flashBadge('departBadge', `しゅっぱつ！ ${nextName}へ`);
-      el('stationCard').classList.remove('flash');
-      void el('stationCard').offsetWidth;
-      el('stationCard').classList.add('flash');
-      sparkleBurst(state.mode === 'romance' ? 24 : 16);
-      animateTrainAdvance();
-      setTimeout(() => el('stationCard').classList.remove('flash'), 760);
-    }
-
-    function arrivalEffect(st) {
-      el('announcementText').textContent = st.announcement;
-      flashBadge('arrivalRibbon', `とうちゃく！ ${st.name}`);
-      const train = el('trainEmoji');
-      train.classList.remove('pop');
-      void train.offsetWidth;
-      train.classList.add('pop');
-      if (state.mode === 'romance') {
-        romanceChime();
-      } else {
-        beep(698, 0.09, 'triangle', 0.02, 2, 0.12);
-      }
-      speak(st.announcement);
-      setTimeout(() => train.classList.remove('pop'), 760);
-    }
-
-    function setStationTheme(st) {
-      document.body.style.background = `linear-gradient(180deg, ${st.color1}, ${st.color2})`;
-      el('stationName').textContent = st.name;
-      el('stationDesc').textContent = st.desc;
-      el('announcementText').textContent = st.announcement;
-      el('landmark').textContent = st.icon;
-      el('stationCard').style.background = 'rgba(255,255,255,.92)';
-      el('stationBadge').textContent = state.index === STATIONS.length - 1 ? 'ゴール！' : 'とうちゃく アナウンス';
-    }
-
-    function updateTrain() {
-      const percent = (state.index / (STATIONS.length - 1)) * 100;
-      el('meterFill').style.width = percent + '%';
-      el('trainEmoji').style.left = `calc(${percent}% - 8px)`;
-      el('trainEmoji').textContent = state.mode === 'romance' ? '🚄' : '🚆';
-      el('stampCount').textContent = `⭐ ${state.stamps.length} / ${STATIONS.length}`;
-    }
-
-    function renderQuestion(playArrival=true) {
-      const st = stationAt(state.index);
-      setStationTheme(st);
-      renderRoute(routeTrack);
-      if (!state.stamps.includes(state.index)) state.stamps.push(state.index);
-      renderStamps(stampsEl);
-      updateTrain();
-      if (playArrival) arrivalEffect(st);
-
-      state.question = currentQuestion();
-      state.wrongCount = 0;
-      el('feedback').className = 'feedback';
-      el('feedback').textContent = '';
-      el('nextBtn').classList.add('hidden');
-      el('retryBtn').classList.add('hidden');
-
-      if (!state.question) return finishGame();
-
-      el('questionType').textContent = state.question.type;
-      el('questionText').textContent = state.question.text;
-      const choices = el('choices');
-      choices.innerHTML = '';
-      state.question.choices.forEach(choice => {
-        const b = document.createElement('button');
-        b.className = 'choice';
-        b.textContent = choice;
-        b.onclick = () => selectChoice(choice, b);
-        choices.appendChild(b);
-      });
-    }
-
-    function selectChoice(choice, btn) {
-      const correct = choice === state.question.correct;
-      const all = [...document.querySelectorAll('.choice')];
-      if (correct) {
-        all.forEach(b => b.disabled = true);
-        btn.classList.add('correct');
-        const next = stationAt(state.index + 1);
-        el('feedback').className = 'feedback ok pop';
-        el('feedback').textContent = `やった！ ${next.name}へ しゅっぱつ！`;
-        if (state.mode === 'romance') {
-          romanceChime();
-        } else {
-          correctFanfare();
-        }
-        celebrateCorrect(next.name);
-        speak(`せいかい！ ${next.name}へ しゅっぱつ！`);
-        el('nextBtn').classList.remove('hidden');
-      } else {
-        btn.classList.add('wrong','shake');
-        state.wrongCount += 1;
-        wrongBuzz();
-        setTimeout(() => btn.classList.remove('shake'), 420);
-        if (state.wrongCount === 1) {
-          el('feedback').className = 'feedback warn pop';
-          el('feedback').textContent = 'おしい！ もういちど えらぼう';
-          const hintBtn = all.find(b => b.textContent === state.question.correct);
-          if (hintBtn) hintBtn.classList.add('hint');
-          el('retryBtn').classList.remove('hidden');
-        } else {
-          all.forEach(b => b.disabled = true);
-          const right = all.find(b => b.textContent === state.question.correct);
-          if (right) right.classList.add('correct');
-          el('feedback').className = 'feedback warn pop';
-          el('feedback').textContent = `こたえは 「${state.question.correct}」！ つぎは いけるよ！`;
-          sparkleBurst(8);
-          el('nextBtn').classList.remove('hidden');
-        }
-      }
-    }
-
-    function nextStep() {
-      state.index += 1;
-      if (state.index >= STATIONS.length - 1) return finishGame();
-      renderQuestion(true);
-    }
-
-    function finishGame() {
-      const finalSt = stationAt(STATIONS.length - 1);
-      setStationTheme(finalSt);
-      if (!state.stamps.includes(STATIONS.length - 1)) state.stamps.push(STATIONS.length - 1);
-      gameScreen.classList.add('hidden');
-      goalScreen.classList.remove('hidden');
-      const total = state.stamps.length;
-      state.best = Math.max(state.best, total);
-      if (!state.unlockedRomance) state.unlockedRomance = true;
-      saveProgress();
-      el('bestBadge').textContent = `⭐ さいこう ${state.best}こ`;
-      el('goalEmoji').textContent = state.mode === 'romance' ? '🚄' : '🎉';
-      el('goalTitle').textContent = 'しんじゅく とうちゃく！';
-      el('goalText').textContent = state.mode === 'count'
-        ? 'すうじも でんしゃも ばっちり！ つぎは ろまんすかーも ためしてみよう。'
-        : 'スタンプを あつめて ゴール！ とうちゃく アナウンスも ばっちりだったね。';
-      renderStamps(goalStamps);
-      const unlock = el('unlockMessage');
-      unlock.classList.remove('hidden');
-      unlock.textContent = '🔓 ろまんすかー モードも たのしんでね！';
-      romanceChime();
-      speak(finalSt.announcement);
-    }
-
-    function startGame(mode) {
-      state.mode = mode;
-      state.index = 0;
-      state.stamps = [];
-      startScreen.classList.add('hidden');
-      goalScreen.classList.add('hidden');
-      gameScreen.classList.remove('hidden');
-      el('appTitle').textContent = mode === 'count' ? 'おだきゅう すうじたんけん！' : mode === 'romance' ? 'ろまんすかー たんけん！' : 'おだきゅう たんけん！';
-      el('modeCaption').textContent = mode === 'count' ? 'えきの かずを かぞえながら しんじゅくへ' : mode === 'romance' ? 'とくべつな れっしゃで きらきら しゅっぱつ！' : 'かいそくきゅうこうで しんじゅくへ';
-      renderQuestion(true);
-    }
-
-    function goHome() {
-      goalScreen.classList.add('hidden');
-      gameScreen.classList.add('hidden');
-      startScreen.classList.remove('hidden');
-      renderRoute(previewRoute);
-      renderStamps(goalStamps);
-      if (state.unlockedRomance) el('romanceLock').classList.remove('hidden');
-    }
-
-    document.querySelectorAll('.modebtn').forEach(btn => btn.addEventListener('click', () => startGame(btn.dataset.mode)));
-    el('nextBtn').addEventListener('click', nextStep);
-    el('retryBtn').addEventListener('click', () => {
-      el('retryBtn').classList.add('hidden');
-      el('feedback').textContent = 'よく みて えらんでみよう！';
+    notes.forEach(({freq, t}) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'sine';
+      const st = ctx.currentTime + t;
+      gain.gain.setValueAtTime(0, st);
+      gain.gain.linearRampToValueAtTime(0.2, st + 0.06);
+      gain.gain.exponentialRampToValueAtTime(0.001, st + 0.7);
+      osc.start(st);
+      osc.stop(st + 0.7);
     });
-    el('againBtn').addEventListener('click', () => startGame(state.mode));
-    el('homeBtn').addEventListener('click', goHome);
-    el('speakBtn').addEventListener('click', () => {
-      const st = stationAt(state.index);
-      speak(`${st.announcement} ${el('questionText').textContent}`);
-    });
+  } catch(e) {}
+}
 
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+function playGoalFanfare() {
+  try {
+    const ctx = getAudioCtx();
+    const melody = [
+      {freq: 523, dur: 0.15},
+      {freq: 523, dur: 0.15},
+      {freq: 523, dur: 0.15},
+      {freq: 659, dur: 0.5},
+      {freq: 784, dur: 0.15},
+      {freq: 784, dur: 0.15},
+      {freq: 784, dur: 0.15},
+      {freq: 1047, dur: 0.8},
+    ];
+    let time = ctx.currentTime;
+    melody.forEach(({freq, dur}) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      osc.type = 'triangle';
+      gain.gain.setValueAtTime(0.25, time);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + dur - 0.02);
+      osc.start(time);
+      osc.stop(time + dur);
+      time += dur;
+    });
+  } catch(e) {}
+}
+
+// ========================================
+// TRAIN RENDERING
+// ========================================
+function createTrainCar(isHead, isRomance) {
+  const carClass = isRomance ? 'romance-car' : 'kaisoku';
+  const bodyWidth = isHead ? 60 : 55;
+  const bodyHeight = 38;
+
+  return `
+    <div class="train-car ${carClass} ${isHead ? 'head-car' : ''}">
+      <div class="train-car-body" style="width:${bodyWidth}px;height:${bodyHeight}px;position:relative;">
+        ${isHead ? '<div class="train-nose' + (isRomance ? ' romance-car' : '') + '"></div>' : ''}
+        <div class="train-car-windows">
+          <div class="window"></div>
+          <div class="window"></div>
+          ${!isHead ? '<div class="window"></div>' : ''}
+        </div>
+        <div class="train-car-stripe"></div>
+      </div>
+      <div class="train-car-wheel-row">
+        <div class="wheel"></div>
+        <div class="wheel"></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderTrain(containerId, isRomance, carCount = 3) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  let html = '';
+  for (let i = 0; i < carCount; i++) {
+    html += createTrainCar(i === 0, isRomance);
+  }
+  container.innerHTML = html;
+  container.className = `scene-train ${isRomance ? 'romance-mode' : ''}`;
+}
+
+// ========================================
+// STARS (decorative)
+// ========================================
+function createStars(containerId, count) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  for (let i = 0; i < count; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 3 + 1;
+    star.style.cssText = `
+      width: ${size}px;
+      height: ${size}px;
+      top: ${Math.random() * 80}%;
+      left: ${Math.random() * 100}%;
+      animation-delay: ${Math.random() * 2}s;
+      animation-duration: ${1.5 + Math.random() * 2}s;
+    `;
+    container.appendChild(star);
+  }
+}
+
+// ========================================
+// BUILDINGS
+// ========================================
+function renderBuildings() {
+  const container = document.getElementById('sceneBuildings');
+  if (!container) return;
+  container.innerHTML = '';
+  const station = STATIONS[state.currentQuestion + 1] || STATIONS[STATIONS.length - 1];
+  if (!station.hasBuildings) return;
+
+  const heights = [40, 65, 45, 70, 50, 60, 35, 75, 55, 45, 68, 40];
+  const widths = [28, 22, 32, 18, 30, 24, 26, 20, 34, 22, 28, 24];
+
+  heights.forEach((h, i) => {
+    const el = document.createElement('div');
+    el.className = 'building';
+    el.style.cssText = `
+      width: ${widths[i]}px;
+      height: ${h}px;
+      background: ${i % 3 === 0 ? '#c8d8e8' : i % 3 === 1 ? '#b8cce0' : '#d8e4f0'};
+    `;
+    container.appendChild(el);
+  });
+
+  container.style.opacity = '1';
+}
+
+// ========================================
+// PROGRESS BAR
+// ========================================
+function renderProgress() {
+  const container = document.getElementById('progressStations');
+  const fill = document.getElementById('progressFill');
+  if (!container || !fill) return;
+
+  // Clear previous dots (keep fill div)
+  while (container.children.length > 1) {
+    container.removeChild(container.lastChild);
+  }
+
+  const totalStations = STATIONS.length;
+  const progress = state.currentQuestion / (totalStations - 1) * 100;
+  fill.style.width = progress + '%';
+
+  STATIONS.forEach((station, idx) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'progress-station';
+
+    const dot = document.createElement('div');
+    dot.className = 'progress-dot';
+    if (idx < state.currentQuestion) {
+      dot.classList.add('done', 'stamp');
+    } else if (idx === state.currentQuestion) {
+      dot.classList.add('current');
     }
 
-    loadProgress();
-    renderRoute(previewRoute);
-    renderStamps(goalStamps);
-  </script>
+    const name = document.createElement('div');
+    name.className = 'progress-name' + (idx === state.currentQuestion ? ' current' : '');
+    name.textContent = station.name.length > 4 ? station.name.substring(0, 4) : station.name;
+
+    const stamp = document.createElement('div');
+    stamp.className = 'progress-stamp';
+    stamp.textContent = idx < state.currentQuestion ? station.emoji : '';
+
+    wrap.appendChild(dot);
+    wrap.appendChild(name);
+    wrap.appendChild(stamp);
+    container.appendChild(wrap);
+  });
+}
+
+// ========================================
+// SCENE UPDATES
+// ========================================
+function updateScene(stationIdx) {
+  const station = STATIONS[stationIdx];
+  const sky = document.getElementById('sceneSky');
+  const ground = document.getElementById('sceneGround');
+  const buildings = document.getElementById('sceneBuildings');
+
+  if (sky) sky.style.background = station.sky;
+  if (ground) ground.style.background = station.ground;
+
+  if (buildings) {
+    if (station.hasBuildings) {
+      renderBuildings();
+    } else {
+      buildings.style.opacity = '0';
+    }
+  }
+
+  // Night-ish for Shinjuku
+  const sun = document.getElementById('sceneSun');
+  if (sun) {
+    if (stationIdx >= 5) {
+      sun.style.opacity = '0';
+    } else {
+      sun.style.opacity = '1';
+    }
+  }
+}
+
+// ========================================
+// QUESTION RENDERING
+// ========================================
+function renderQuestion() {
+  const q = QUESTIONS[state.currentQuestion];
+  const station = STATIONS[state.currentQuestion];
+
+  // Station sign
+  const signName = document.getElementById('stationSignName');
+  if (signName) signName.textContent = station.name;
+
+  // Announcement
+  const annText = document.getElementById('announcementText');
+  if (annText) annText.textContent = q.announcement;
+
+  // Question
+  const qText = document.getElementById('questionText');
+  if (qText) qText.textContent = q.text;
+
+  // Choices
+  const container = document.getElementById('choicesContainer');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const nums = ['①', '②', '③'];
+  q.choices.forEach((choice, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="choice-num">${nums[idx]}</span><span class="choice-text">${choice}</span>`;
+    btn.addEventListener('click', () => handleAnswer(idx, btn));
+    container.appendChild(btn);
+  });
+
+  state.answered = false;
+}
+
+// ========================================
+// ANSWER HANDLING
+// ========================================
+function handleAnswer(idx, btn) {
+  if (state.answered) return;
+  state.answered = true;
+
+  const q = QUESTIONS[state.currentQuestion];
+  const allBtns = document.querySelectorAll('.choice-btn');
+
+  if (idx === q.correct) {
+    // CORRECT!
+    btn.classList.add('correct');
+    allBtns.forEach(b => b.style.pointerEvents = 'none');
+    playPinpon();
+    spawnSparkles(true);
+
+    setTimeout(() => {
+      showDepartureOverlay();
+    }, 600);
+
+  } else {
+    // WRONG
+    btn.classList.add('wrong');
+    playWrong();
+    showWrongFeedback();
+
+    setTimeout(() => {
+      btn.classList.remove('wrong');
+      state.answered = false;
+    }, 800);
+  }
+}
+
+// ========================================
+// SPARKLES
+// ========================================
+function spawnSparkles(isLarge) {
+  const container = document.getElementById('sparkleContainer');
+  if (!container) return;
+
+  const count = isLarge ? 20 : 8;
+  const emojis = ['✨', '⭐', '🌟', '💫', '🎉'];
+
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'sparkle';
+    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    el.style.cssText = `
+      left: ${10 + Math.random() * 80}%;
+      top: ${20 + Math.random() * 60}%;
+      font-size: ${16 + Math.random() * 24}px;
+      animation-delay: ${Math.random() * 0.4}s;
+      animation-duration: ${0.8 + Math.random() * 0.8}s;
+    `;
+    container.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+
+// ========================================
+// WRONG FEEDBACK
+// ========================================
+function showWrongFeedback() {
+  const el = document.createElement('div');
+  el.className = 'feedback-wrong';
+  el.textContent = 'おしい！';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 800);
+}
+
+// ========================================
+// DEPARTURE OVERLAY
+// ========================================
+function showDepartureOverlay() {
+  const overlay = document.getElementById('overlay');
+  const isRomance = state.mode === 'romance';
+
+  if (isRomance) {
+    playRomanceChime();
+  } else {
+    playDeparture();
+  }
+
+  overlay.innerHTML = `
+    <div class="departure-overlay ${isRomance ? 'romance' : ''}">
+      <div class="departure-text">しゅっぱつ！</div>
+      <div class="departure-sub">🚃 ${isRomance ? '✨ ロマンスカー ✨' : 'でんしゃが でます'}</div>
+    </div>
+  `;
+  overlay.classList.add('active');
+  spawnSparkles(true);
+
+  // Animate train moving right
+  animateTrainDeparture();
+
+  setTimeout(() => {
+    overlay.classList.remove('active');
+    overlay.innerHTML = '';
+    advanceStation();
+  }, 2000);
+}
+
+function animateTrainDeparture() {
+  const train = document.getElementById('gameTrain');
+  if (!train) return;
+  train.style.transition = 'left 1.8s cubic-bezier(0.4, 0, 1, 1)';
+  train.style.left = '130%';
+  setTimeout(() => {
+    train.style.transition = 'none';
+    train.style.left = '-30%';
+    setTimeout(() => {
+      train.style.transition = 'left 1.5s cubic-bezier(0, 0.4, 0.4, 1)';
+      train.style.left = '50%';
+    }, 100);
+  }, 1800);
+}
+
+// ========================================
+// ADVANCE STATION
+// ========================================
+function advanceStation() {
+  const nextStationIdx = state.currentQuestion + 1;
+  const nextStation = STATIONS[nextStationIdx];
+
+  state.stamps.push(STATIONS[state.currentQuestion].emoji);
+
+  // Show arrival
+  showArrivalOverlay(nextStation, nextStationIdx, () => {
+    state.currentQuestion++;
+
+    if (state.currentQuestion >= QUESTIONS.length) {
+      showGoal();
+    } else {
+      updateScene(state.currentQuestion);
+      renderProgress();
+      renderQuestion();
+    }
+  });
+}
+
+// ========================================
+// ARRIVAL OVERLAY
+// ========================================
+function showArrivalOverlay(station, stationIdx, callback) {
+  const overlay = document.getElementById('overlay');
+  const isRomance = state.mode === 'romance';
+  const isGoal = stationIdx >= STATIONS.length - 1;
+
+  overlay.innerHTML = `
+    <div class="arrival-overlay">
+      <div class="arrival-stamp-icon">${station.emoji}</div>
+      <div class="arrival-label">とうちゃく！</div>
+      <div class="arrival-name">${station.name}</div>
+      <div class="arrival-sub">${station.nameEn}</div>
+      <button class="arrival-btn" id="arrivalNextBtn">
+        ${isGoal ? '🎉 ゴール！' : 'つぎへ →'}
+      </button>
+    </div>
+  `;
+  overlay.classList.add('active');
+
+  document.getElementById('arrivalNextBtn').addEventListener('click', () => {
+    overlay.classList.remove('active');
+    overlay.innerHTML = '';
+    updateScene(stationIdx);
+    callback();
+  });
+}
+
+// ========================================
+// GOAL SCREEN
+// ========================================
+function showGoal() {
+  const isRomance = state.mode === 'romance';
+
+  // Update goal screen
+  document.getElementById('goalEmoji').textContent = isRomance ? '🌟' : '🎉';
+  document.getElementById('goalSubtitle').textContent = 'しんじゅく に とうちゃく！';
+
+  // Stamps
+  const stampsContainer = document.getElementById('goalStamps');
+  stampsContainer.innerHTML = '';
+  STATIONS.forEach((station, idx) => {
+    const item = document.createElement('div');
+    item.className = 'goal-stamp-item';
+    item.innerHTML = `
+      <div class="goal-stamp-icon">${station.emoji}</div>
+      <div class="goal-stamp-name">${station.name.substring(0, 4)}</div>
+    `;
+    stampsContainer.appendChild(item);
+  });
+
+  showScreen('screen-goal');
+  playGoalFanfare();
+  spawnSparkles(true);
+  startFireworks();
+}
+
+function startFireworks() {
+  const container = document.getElementById('goalFireworks');
+  if (!container) return;
+
+  const colors = ['#ff4444', '#44ff44', '#4444ff', '#ffff44', '#ff44ff', '#44ffff', '#ffd700'];
+  const interval = setInterval(() => {
+    const fw = document.createElement('div');
+    fw.className = 'firework';
+    const size = 20 + Math.random() * 30;
+    fw.style.cssText = `
+      width: ${size}px;
+      height: ${size}px;
+      left: ${Math.random() * 100}%;
+      top: ${Math.random() * 70}%;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      animation-duration: ${1 + Math.random() * 1}s;
+      animation-delay: ${Math.random() * 0.5}s;
+    `;
+    container.appendChild(fw);
+    fw.addEventListener('animationend', () => fw.remove());
+  }, 300);
+
+  setTimeout(() => clearInterval(interval), 5000);
+}
+
+// ========================================
+// NAVIGATION
+// ========================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+  });
+  const target = document.getElementById(id);
+  if (target) {
+    target.classList.add('active', 'fade-in');
+    setTimeout(() => target.classList.remove('fade-in'), 600);
+  }
+}
+
+function showModeSelect() {
+  showScreen('screen-mode');
+}
+
+function startGame(mode) {
+  state.mode = mode;
+  state.currentQuestion = 0;
+  state.stamps = [];
+  state.answered = false;
+
+  const isRomance = mode === 'romance';
+
+  // Render train
+  renderTrain('gameTrain', isRomance, 4);
+
+  // Update scene for first station
+  updateScene(0);
+  renderProgress();
+  renderQuestion();
+
+  showScreen('screen-game');
+}
+
+function restartGame() {
+  showScreen('screen-start');
+}
+
+// ========================================
+// INIT
+// ========================================
+function init() {
+  // Create stars on start screen
+  createStars('startSky', 30);
+
+  // Render train on start screen
+  renderTrain('startTrain', false, 3);
+
+  // Show start screen
+  document.getElementById('screen-start').classList.add('active');
+}
+
+// Start on load
+window.addEventListener('load', init);
+
+// Prevent scroll bounce on iOS
+document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+
+// Service Worker 登録
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {
+    // SW未対応環境ではスルー
+  });
+}
+</script>
+
 </body>
 </html>
