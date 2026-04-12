@@ -894,14 +894,6 @@ go(‘pg-start’);
 return { onStart, onMode, onRetry };
 })();
 
-/* ===================================================
-EVENTS
-=================================================== */
-$(‘btnStart’).addEventListener(‘click’, () => Game.onStart());
-$(‘btnK’).addEventListener(‘click’,     () => Game.onMode(‘kaisoku’));
-$(‘btnR’).addEventListener(‘click’,     () => Game.onMode(‘romance’));
-$(‘btnRetry’).addEventListener(‘click’, () => Game.onRetry());
-
 function showToast(msg) {
 const el = document.createElement(‘div’);
 el.className = ‘toast’; el.textContent = msg;
@@ -910,10 +902,16 @@ setTimeout(() => el.remove(), 920);
 }
 
 /* ===================================================
-INIT
+BOOT（body末尾のscriptなのでDOMは確定済み・直接実行）
 =================================================== */
-(() => {
+// ボタンイベント
+$(‘btnStart’).addEventListener(‘click’, () => Game.onStart());
+$(‘btnK’).addEventListener(‘click’,     () => Game.onMode(‘kaisoku’));
+$(‘btnR’).addEventListener(‘click’,     () => Game.onMode(‘romance’));
+$(‘btnRetry’).addEventListener(‘click’, () => Game.onRetry());
+
 // 星
+(function initStars() {
 const wrap = $(‘stars’);
 for (let i = 0; i < 38; i++) {
 const s = document.createElement(‘div’); s.className = ‘star’;
@@ -921,20 +919,22 @@ const sz = Math.random() * 3 + 1;
 s.style.cssText = `width:${sz}px;height:${sz}px; top:${Math.random()*92}%;left:${Math.random()*100}%; animation-delay:${Math.random()*2.2}s;animation-duration:${1.4+Math.random()*2}s;`;
 wrap.appendChild(s);
 }
+})();
+
 // スタート画面の電車
 $(‘sTrain’).innerHTML = mkTrain(false, 4);
+
 // スクロール防止
 document.addEventListener(‘touchmove’, e => e.preventDefault(), {passive: false});
-// PWA SW（失敗してもゲームには影響しない）
+
+// PWA SW（失敗してもゲームに影響しない）
 try {
 if (‘serviceWorker’ in navigator) {
 const sw = `const V='v5'; self.addEventListener('install', () => self.skipWaiting()); self.addEventListener('activate', e => e.waitUntil( caches.keys().then(ks => Promise.all(ks.filter(k => k !== V).map(k => caches.delete(k)))) )); self.addEventListener('fetch', e => e.respondWith( caches.match(e.request).then(r => r || fetch(e.request)) ));`;
 const blob = new Blob([sw], {type: ‘application/javascript’});
-const url  = URL.createObjectURL(blob);
-navigator.serviceWorker.register(url).catch(() => {});
+navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
 }
 } catch (_) {}
-})();
 </script>
 
 </body>
