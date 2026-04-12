@@ -730,19 +730,6 @@ blds.style.opacity = ‘0’;
 }
 
 /* ===================================================
-SCREEN SWITCH
-.on クラスだけで制御。style.display は触らない。
-CSS: .scr { display:none }  .scr.on { display:flex }
-=================================================== */
-const PAGES = [‘pg-start’,‘pg-mode’,‘pg-question’,‘pg-depart’,‘pg-arrive’,‘pg-goal’];
-const $ = id => document.getElementById(id);
-
-function go(id) {
-PAGES.forEach(p => $(p).classList.remove(‘on’));
-requestAnimationFrame(() => $(id).classList.add(‘on’));
-}
-
-/* ===================================================
 GAME STATE MACHINE
 =================================================== */
 const Game = (() => {
