@@ -614,22 +614,35 @@ to   { transform: translate(-50%,-50%) scale(1);  opacity: 1; }
 </div>
 <script>
 /* ===================================================
-   DATA
+   ★ ユーティリティ最優先定義（Safari対応）
+   const は hoisting されないので使う前に定義必須
+=================================================== */
+const $ = id => document.getElementById(id);
+
+const PAGES = [‘pg-start’,‘pg-mode’,‘pg-question’,‘pg-depart’,‘pg-arrive’,‘pg-goal’];
+
+function go(id) {
+PAGES.forEach(p => $(p).classList.remove(‘on’));
+requestAnimationFrame(() => $(id).classList.add(‘on’));
+}
+
+/* ===================================================
+DATA
 =================================================== */
 const ST = [
-  {n:'まちだ',         e:'🏙️', sky:'linear-gradient(180deg,#78c0e8,#aad8f8 65%,#cce8ff)', gnd:'linear-gradient(#6ab84a,#4a9e2a)', b:false},
-  {n:'しんゆりがおか', e:'🌸', sky:'linear-gradient(180deg,#90d0f0,#bce4f8 65%,#d8f0ff)', gnd:'linear-gradient(#5aaa3a,#3a8e1a)', b:true },
-  {n:'のぼりと',       e:'🌊', sky:'linear-gradient(180deg,#a8d8f8,#cce8ff 65%,#e4f4ff)', gnd:'linear-gradient(#48961a,#287a08)', b:true },
-  {n:'しもきたざわ',   e:'🎵', sky:'linear-gradient(180deg,#b8c8e8,#ccd8f0 65%,#dde8f8)', gnd:'linear-gradient(#909098,#707078)', b:true },
-  {n:'よよぎうえはら', e:'🌆', sky:'linear-gradient(180deg,#e0c8a8,#ecd8b8 65%,#f8ecd0)', gnd:'linear-gradient(#808090,#606070)', b:true },
-  {n:'しんじゅく',     e:'🌟', sky:'linear-gradient(180deg,#181830,#242448 65%,#303060)', gnd:'linear-gradient(#585868,#383848)', b:true },
+{n:‘まちだ’,         e:‘🏙️’, sky:‘linear-gradient(180deg,#78c0e8,#aad8f8 65%,#cce8ff)’, gnd:‘linear-gradient(#6ab84a,#4a9e2a)’, b:false},
+{n:‘しんゆりがおか’, e:‘🌸’, sky:‘linear-gradient(180deg,#90d0f0,#bce4f8 65%,#d8f0ff)’, gnd:‘linear-gradient(#5aaa3a,#3a8e1a)’, b:true },
+{n:‘のぼりと’,       e:‘🌊’, sky:‘linear-gradient(180deg,#a8d8f8,#cce8ff 65%,#e4f4ff)’, gnd:‘linear-gradient(#48961a,#287a08)’, b:true },
+{n:‘しもきたざわ’,   e:‘🎵’, sky:‘linear-gradient(180deg,#b8c8e8,#ccd8f0 65%,#dde8f8)’, gnd:‘linear-gradient(#909098,#707078)’, b:true },
+{n:‘よよぎうえはら’, e:‘🌆’, sky:‘linear-gradient(180deg,#e0c8a8,#ecd8b8 65%,#f8ecd0)’, gnd:‘linear-gradient(#808090,#606070)’, b:true },
+{n:‘しんじゅく’,     e:‘🌟’, sky:‘linear-gradient(180deg,#181830,#242448 65%,#303060)’, gnd:‘linear-gradient(#585868,#383848)’, b:true },
 ];
 const QS = [
-  {si:0, q:'まちだの\nつぎは どこ？',         a:0, cs:['しんゆりがおか','たまがわがくえんまえ','さがみおおの']},
-  {si:1, q:'しんゆりがおかの\nつぎは どこ？', a:0, cs:['のぼりと','よみうりランドまえ','むこうがおかゆえん']},
-  {si:2, q:'のぼりとの\nつぎは どこ？',       a:2, cs:['きたみ','せいじょうがくえんまえ','しもきたざわ']},
-  {si:3, q:'しもきたざわの\nつぎは どこ？',   a:1, cs:['だいたばし','よよぎうえはら','さんぐうばし']},
-  {si:4, q:'よよぎうえはらの\nつぎは どこ？', a:0, cs:['しんじゅく','はらじゅく','よよぎ']},
+{si:0, q:‘まちだの\nつぎは どこ？’,         a:0, cs:[‘しんゆりがおか’,‘たまがわがくえんまえ’,‘さがみおおの’]},
+{si:1, q:‘しんゆりがおかの\nつぎは どこ？’, a:0, cs:[‘のぼりと’,‘よみうりランドまえ’,‘むこうがおかゆえん’]},
+{si:2, q:‘のぼりとの\nつぎは どこ？’,       a:2, cs:[‘きたみ’,‘せいじょうがくえんまえ’,‘しもきたざわ’]},
+{si:3, q:‘しもきたざわの\nつぎは どこ？’,   a:1, cs:[‘だいたばし’,‘よよぎうえはら’,‘さんぐうばし’]},
+{si:4, q:‘よよぎうえはらの\nつぎは どこ？’, a:0, cs:[‘しんじゅく’,‘はらじゅく’,‘よよぎ’]},
 ];
 
 /* ===================================================
