@@ -925,12 +925,15 @@ wrap.appendChild(s);
 $(‘sTrain’).innerHTML = mkTrain(false, 4);
 // スクロール防止
 document.addEventListener(‘touchmove’, e => e.preventDefault(), {passive: false});
-// PWA SW インライン登録
+// PWA SW（失敗してもゲームには影響しない）
+try {
 if (‘serviceWorker’ in navigator) {
 const sw = `const V='v5'; self.addEventListener('install', () => self.skipWaiting()); self.addEventListener('activate', e => e.waitUntil( caches.keys().then(ks => Promise.all(ks.filter(k => k !== V).map(k => caches.delete(k)))) )); self.addEventListener('fetch', e => e.respondWith( caches.match(e.request).then(r => r || fetch(e.request)) ));`;
 const blob = new Blob([sw], {type: ‘application/javascript’});
-navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+const url  = URL.createObjectURL(blob);
+navigator.serviceWorker.register(url).catch(() => {});
 }
+} catch (_) {}
 })();
 </script>
 
