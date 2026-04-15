@@ -207,17 +207,20 @@ animation: gBounce 0.72s cubic-bezier(0.34,1.56,0.64,1) 0.18s both;
 /* ===== もころんポップアップ（正解時） ===== */
 #moko-popup {
 position: fixed;
-bottom: -300px;
+bottom: 0;
 left: 50%;
-transform: translateX(-50%);
+/* 初期状態：画面下に隠す（translateYで制御） */
+transform: translateX(-50%) translateY(320px);
 z-index: 8000;
 pointer-events: none;
-transition: bottom 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+/* transformのtransitionでアニメ（Safariで最も安定） */
+transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 text-align: center;
 width: 220px;
+padding-bottom: calc(var(–sb) + 8px);
 }
 #moko-popup.show {
-bottom: calc(var(–sb) + 8px);
+transform: translateX(-50%) translateY(0);
 }
 .moko-bubble {
 display: inline-block;
